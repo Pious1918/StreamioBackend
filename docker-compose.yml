@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+
+
+  api-gateway:
+    restart: on-failure
+    build: 
+      context: ./apiGateway
+      dockerfile: Dockerfile
+    container_name: streamio-apiGateway
+    ports: 
+      - "5000:5000"
+    volumes:
+    - ./apiGateway:/app 
+    depends_on: 
+      - user-service
+    networks:
+      - streamio_network     
+
+
+
+
+
+  user-service:
+    restart: on-failure
+    build: 
+      context: ./userService
+      dockerfile: Dockerfile
+    container_name: streamio-user-service
+    ports: 
+      - "5001:5001" 
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017/userService
+    volumes:
+    - ./userService:/app  
+    depends_on:
+      - mongodb
+    networks:
+      - streamio_network
+
+
+  mongodb:
+    image: mongo
+    container_name: streamio-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_URL=mongodb+srv://nspious1999:n9f6ez6hGkMw1qMu@streamio-user-service.uuj2g.mongodb.net/  
+    networks:
+      - streamio_network
+    volumes:
+      - mongodb-data:/data/db
+
+volumes:
+  mongodb-data:
+
+networks:
+  streamio_network:
+    driver: bridge
