@@ -56,11 +56,8 @@ export class UserService implements IUserService {
     }
 
 
-    // async userDetails(email: string) {
-    //     return this._userRepository.findByEmail(email)
-    // }
 
-
+    
     async login(email: string, password: string): Promise<IuserDocument> {
 
         const user = await this._userRepository.findByEmail(email)
@@ -98,12 +95,16 @@ export class UserService implements IUserService {
         }
     }
 
-    async searchUsers(nameQuery:string , loggedInUserName:string){
+    async searchUsers(nameQuery: string, loggedInUserName: string): Promise<IuserDocument[]> {
         try {
-            console.log("@service",nameQuery , loggedInUserName)
-            return await this._userRepository.findUsers(nameQuery , loggedInUserName)
+            console.log("@service", nameQuery, loggedInUserName);
+            const users = await this._userRepository.findUsers(nameQuery, loggedInUserName);
+
+            // Return an empty array if users is undefined
+            return users || [];
         } catch (error) {
-            
+            console.error("error in search user", error)
+            return [];
         }
     }
 
@@ -176,7 +177,7 @@ export class UserService implements IUserService {
             console.log("@service", updateFields)
             console.log(userId)
             if (updateFields.name) {
-                console.log("hai rom name",updateFields.name)
+                console.log("hai rom name", updateFields.name)
                 updatedFields.name = updateFields.name
             }
             if (updateFields.email) {
@@ -188,7 +189,7 @@ export class UserService implements IUserService {
             if (updateFields.country) {
                 updatedFields.country = updateFields.country
             }
-            console.log("hai tehrer",userId)
+            console.log("hai tehrer", userId)
             return await this._userRepository.updateProfileByUserId(userId, updatedFields)
 
 
@@ -203,7 +204,7 @@ export class UserService implements IUserService {
 
             console.log("@service of profilepic")
             // Upload file to S3 and get the image URL
-            
+
             // console.log(`email is ${userId} , imageurl ${imageUrl}`)
             const updateProfileImage = await this._userRepository.updateProfilePicture(userId, file)
             return { imagePath: file, updateProfileImage }
@@ -214,26 +215,26 @@ export class UserService implements IUserService {
     }
 
 
-    async updateSubscriptions(userid:any, channelid:string):Promise<any>{
+    async updateSubscriptions(userid: any, channelid: string): Promise<any> {
 
         console.log(`user@servi ${userid} : ${channelid}`)
         try {
-            
-            return await this._userRepository.updateSub(userid , channelid)
+
+            return await this._userRepository.updateSub(userid, channelid)
 
         } catch (error) {
-            
+
         }
     }
-    async updateUnSubscriptions(userid:any, channelid:string):Promise<any>{
+    async updateUnSubscriptions(userid: any, channelid: string): Promise<any> {
 
         console.log(`user@servi ${userid} : ${channelid}`)
         try {
-            
-            return await this._userRepository.updateUnSub(userid , channelid)
+
+            return await this._userRepository.updateUnSub(userid, channelid)
 
         } catch (error) {
-            
+
         }
     }
 
@@ -275,12 +276,12 @@ export class UserService implements IUserService {
         }
     }
 
-    async updateUserStatus(id:string , status:string):Promise<any>{
+    async updateUserStatus(id: string, status: string): Promise<any> {
         try {
 
             const updatedUser = await this._userRepository.updateUserStatus(id, status);
 
-            return updatedUser; 
+            return updatedUser;
         } catch (error) {
             throw new Error(`Error in updating user status:`);
         }

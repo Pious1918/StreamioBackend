@@ -3,9 +3,14 @@ import { BaseRepository } from "./baseRepo";
 import { userRepository } from "./userRepository";
 
 
-///adminrepository classs extends baserepo : means it inherits all the methods defined in baserepo
+export interface IAdminRepository {
+    findByEmailAndRole(email: string, role: string): Promise<IadminDocument | null>;
+    getAllUsers(): Promise<any>;
+}
 
-export class adminRepostiory extends BaseRepository<IadminDocument> {
+
+///adminrepository classs extends baserepo : means it inherits all the methods defined in baserepo
+export class adminRepostiory extends BaseRepository<IadminDocument> implements IAdminRepository {
 
     private userRepository: userRepository
 
@@ -20,8 +25,6 @@ export class adminRepostiory extends BaseRepository<IadminDocument> {
     async findByEmailAndRole(email: string, role: string): Promise<IadminDocument | null> {
 
         console.log("herer")
-
-
         return this.findOne({ email })  ///this.findone refers to the method in the parent class which baseRepo
     }
 

@@ -6,7 +6,8 @@ export interface IBaseRepository<T>{
     findOne(filter: Partial<T>): Promise<T | null>;
     findByIdAndUpdate(id:string , update:Partial<T>) : Promise<T | null>;
     find(filter? : Partial<T>): Promise<T[]>;
-    findAndUpdateSet(id: string, field: keyof T, value: any): Promise<T | null>;
+    findAndUpdateSet(id: string, field: keyof T, value: string): Promise<T | null>;
+    uNfindAndUpdateSet(id: string, field: keyof T, value: string): Promise<T | null>;
 
 }
 
@@ -34,7 +35,7 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     }
 
 
-    async findAndUpdateSet(id: string, field: keyof T, value: any): Promise<T | null> {
+    async findAndUpdateSet(id: string, field: keyof T, value: string): Promise<T | null> {
         const result = await this.model.findByIdAndUpdate(
             id,
             { $addToSet: { [field as string]: value } } as any,  // Bypass type check for the dynamic field
@@ -44,7 +45,9 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
         // Return the document or null
         return result ? result as T : null;
     }
-    async uNfindAndUpdateSet(id: string, field: keyof T, value: any): Promise<T | null> {
+
+
+    async uNfindAndUpdateSet(id: string, field: keyof T, value: string): Promise<T | null> {
         const result = await this.model.findByIdAndUpdate(
             id,
             { $pull: { [field as string]: value } } as any,  // Bypass type check for the dynamic field

@@ -6,6 +6,9 @@ export interface IUserController {
     loginuser(req: Request, res: Response , next: NextFunction): Promise<void>;
     getUserProfile(req: Request, res: Response): Promise<void>;
     updateUserStatus(req:Request , res:Response):Promise<void>
+
+
+    
 //     updateProfilePic(req: any, res: Response): Promise<void>;
 //     updateUserData(req: Request, res: Response): Promise<void>;
 

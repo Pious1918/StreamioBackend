@@ -219,32 +219,6 @@ export class UserController implements IUserController {
         }
     }
 
-    // router.post('/subscribe', middleWare.authorize, async (req: any, res) => {
-    //     try {
-    //         const userId = req.user.userId; // Get the logged-in user's ID from the token
-    //         const { channelId } = req.body; // E
-    //         console.log("userId", userId)
-    //         console.log("chaneel id", channelId)
-    //         const newfollowing = new FollowingModel({
-    //             userId: userId,
-    //             followingUserId: channelId
-    //         })
-
-    //         const newSubscriber = new SubscriberModel({
-    //             userId: channelId,
-    //             subscribedUserId: userId
-
-    //         })
-    //         await newfollowing.save();
-    //         await newSubscriber.save();
-
-    //     } catch (error) {
-    //         console.log("Error occurred:", error);
-    //         res.status(500).send('Server error');
-    //     }
-    // });
-
-
 
 
 
