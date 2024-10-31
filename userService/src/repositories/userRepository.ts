@@ -1,22 +1,11 @@
-// import adminModel, { IadminDocument } from "../models/adminModel";
-// import userModel, { IuserDocument } from "../models/userModel";
+
 // //writes queries based on the database interaction
 
 import { FilterQuery } from "mongoose";
 import userModel, { IuserDocument } from "../models/userModel";
 import { BaseRepository } from "./baseRepo";
+import { IUserRepository } from "../interfaces/user.repo.interface";
 
-export interface IUserRepository {
-    findByEmail(email: string): Promise<IuserDocument | null>;
-    createUser(userData: Partial<IuserDocument>): Promise<IuserDocument | null>;
-    updateProfileByUserId(userId: string, updatedFields: any): Promise<any>;
-    updateProfilePicture(userId: string, imageUrl: string): Promise<IuserDocument | null>;
-    updateSub(userId: string, channelId: string): Promise<IuserDocument | null>;
-    updateUnSub(userId: string, channelId: string): Promise<IuserDocument | null>;
-    getAllUsers(): Promise<IuserDocument[]>;
-    updateUserStatus(id: string, status: string): Promise<IuserDocument | null>;
-    findUsers(nameQuery: string, loggedInUserName: string): Promise<IuserDocument[]>;
-}
 
 
 export class userRepository extends BaseRepository<IuserDocument> implements IUserRepository{
@@ -99,15 +88,29 @@ export class userRepository extends BaseRepository<IuserDocument> implements IUs
     }
 
     ///get all users sorted by creation date
-    async getAllUsers(): Promise<IuserDocument[]> {
-        try {
-            const users = await userModel.find().sort({ createdAt: -1 });;
-            return users;
-        } catch (error) {
-            console.error("Error in getAllUsers repository:", error);
-            throw new Error('Error fetching users from the database');
-        }
+    // async getAllUsers(): Promise<IuserDocument[]> {
+    //     try {
+    //         const users = await userModel.find().sort({ createdAt: -1 });;
+    //         return users;
+    //     } catch (error) {
+    //         console.error("Error in getAllUsers repository:", error);
+    //         throw new Error('Error fetching users from the database');
+    //     }
+    // }
+// Repository layer
+async getAllUsers(limit: number, offset: number): Promise<IuserDocument[]> {
+    try {
+        const users = await userModel.find()
+            .sort({ createdAt: -1 }) // Sorting by creation date, descending
+            .limit(limit)
+            .skip(offset); // Offset for pagination
+        return users;
+    } catch (error) {
+        console.error("Error in getAllUsers repository:", error);
+        throw new Error('Error fetching users from the database');
     }
+}
+
 
 
     async updateUserStatus(id: string, status: string): Promise<IuserDocument | null> {

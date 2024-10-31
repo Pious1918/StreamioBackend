@@ -1,15 +1,8 @@
 
 import { Document, FilterQuery, Model } from "mongoose";
+import { IBaseRepository } from "../interfaces/base.repo.interface";
 
-export interface IBaseRepository<T>{
-    save(item:Partial<T>):Promise<T | null>;
-    findOne(filter: Partial<T>): Promise<T | null>;
-    findByIdAndUpdate(id:string , update:Partial<T>) : Promise<T | null>;
-    find(filter? : Partial<T>): Promise<T[]>;
-    findAndUpdateSet(id: string, field: keyof T, value: string): Promise<T | null>;
-    uNfindAndUpdateSet(id: string, field: keyof T, value: string): Promise<T | null>;
 
-}
 
 export class BaseRepository<T extends Document> implements IBaseRepository<T> {
 
@@ -42,7 +35,7 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
             { new: true }  // Return the updated document
         ).exec();
     
-        // Return the document or null
+        
         return result ? result as T : null;
     }
 

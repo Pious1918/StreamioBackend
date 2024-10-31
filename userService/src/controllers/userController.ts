@@ -78,7 +78,7 @@ export class UserController implements IUserController {
 
             // Check if the user's status is active
             if (result.status !== 'active') {
-                
+
                 res.status(403).json({ message: 'User is blocked' });
                 return
             }
@@ -243,16 +243,31 @@ export class UserController implements IUserController {
     public loadAdminDashboard = async (req: Request, res: Response): Promise<void> => {
         try {
 
+
+
+            // Get page and limit from query params, with defaults for the first page and 6 items per page
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 6;
+
+            console.log(`page is ${page} limit : ${limit}`)
             console.log("Controller: loadAdminDashboard");
 
 
-            const allUsers = await this._userService.getAllUsers();
+            const allUsers = await this._userService.getAllUsers(page, limit);
+            // Calculate total users and pages for pagination
+            const totalUsers = await this._userService.countAllUsers();
+            const totalPages = Math.ceil(totalUsers / limit);
 
 
-            console.log("Fetched Users:", allUsers);
+            console.log(`totalusers:${totalUsers}  totalPages:${totalPages}`)
+            // console.log("Fetched Users:", allUsers);
 
 
-            res.status(200).json({ users: allUsers });
+            res.status(200).json({ 
+                users: allUsers,
+                totalPages,
+                currentPage: page
+            });
         } catch (error) {
 
             console.error("Error in loadAdminDashboard:", error);

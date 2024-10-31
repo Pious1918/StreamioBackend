@@ -8,10 +8,13 @@ import cors from 'cors';
 
 import proxy from 'express-http-proxy'
 import morgan from "morgan"
+import { AuthMiddleware } from "./middlewares/authmiddleware";
 
 dotenv.config()
 
 const app = express()
+const authMiddleware = new AuthMiddleware(); // Create an instance of the middleware
+
 app.use(express.json({limit: "100mb"}));
 app.use(express.static("public"))
 app.use(express.json());
@@ -22,7 +25,9 @@ app.use(morgan('tiny')); // Use morgan to log incoming requests to the API gatew
 // app.use('/user-service', proxy('http://user-service:5001'));
 app.use('/user-service', proxy('http://localhost:5001'));
 
-  
+app.use('/video-service', proxy('http://localhost:5002'))
+
+
 
 const port = process.env.SERVER_PORT || 5000
 

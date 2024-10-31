@@ -20,7 +20,17 @@ export interface IUserService {
     adminLogin(email: string, password: string): Promise<IadminDocument>;
 
     // Get all users (admin)
-    getAllUsers(): Promise<IuserDocument[]>;
+    // getAllUsers(): Promise<IuserDocument[]>;
+
+
+    getAllUsers(page: number, limit: number): Promise<{
+        users: IuserDocument[];
+        total: number;
+        currentPage: number;
+        totalPages: number;
+    }>;
+
+
 
     // Update user profile
     updateProfile(userId: string, updateFields: {

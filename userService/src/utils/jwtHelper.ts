@@ -55,3 +55,19 @@ export const generateAdminToken = (admin:IadminDocument):string =>{
         expiresIn : process.env.JWT_EXPIRY || '1h'
     })
 }
+0
+
+
+
+export const generateRefreshToken = (payload: IPayload): string => {
+    return jwt.sign(payload, process.env.JWT_REFRESH_SECRET as string, { expiresIn: process.env.JWT_REFRESH_EXPIRY });
+};
+
+
+export const verifyToken = (token: string): IPayload => {
+    return jwt.verify(token, process.env.JWT_SECRET as string) as IPayload;
+};
+
+export const verifyRefreshToken = (refreshToken: string): IPayload => {
+    return jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as IPayload;
+};

@@ -1,0 +1,5 @@
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/hai\",\"status\":\"200\",\"responseTime\":\"106.777\"}","timestamp":"2024-10-28T14:41:23.268Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/videouploading\",\"status\":\"404\",\"responseTime\":\"7.200\"}","timestamp":"2024-10-28T14:45:13.526Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/videouploading\",\"status\":\"404\",\"responseTime\":\"0.847\"}","timestamp":"2024-10-28T14:45:20.136Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/videouploading\",\"status\":\"-\",\"responseTime\":\"-\"}","timestamp":"2024-10-28T15:09:31.862Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/videouploading\",\"status\":\"-\",\"responseTime\":\"-\"}","timestamp":"2024-10-28T15:14:31.906Z"}

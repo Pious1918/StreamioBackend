@@ -264,17 +264,54 @@ export class UserService implements IUserService {
 
 
 
-    async getAllUsers(): Promise<any> {
+    async getAllUsers(page: number, limit: number): Promise<any> {
         try {
 
-            const allUsers = await this._adminRepository.getAllUsers();
+            const allUsers = await this._adminRepository.getAllUsers(page , limit);
             return allUsers;
+
+
         } catch (error) {
 
             console.error("Error in getAllUsers:", error);
             throw new Error('Error fetching users from the service');
         }
     }
+
+    async countAllUsers(): Promise<number> {
+        try {
+            return await this._adminRepository.countAllUsers();
+        } catch (error) {
+            console.error("Error in countAllUsers:", error);
+            throw new Error('Error counting users from the service');
+        }
+    }
+    
+
+
+
+    // async getAllUsers(page: number, limit: number): Promise<any> {
+    //     try {
+    //         const offset = (page - 1) * limit;
+    //         const [users, total] = await Promise.all([
+    //             this._adminRepository.getAllUsers(limit, offset),
+    //             this._adminRepository.getUsersCount()
+    //         ]);
+    
+    //         return {
+    //             users,
+    //             total,
+    //             currentPage: page,
+    //             totalPages: Math.ceil(total / limit)
+    //         };
+    //     } catch (error) {
+    //         console.error("Error in getAllUsers service:", error);
+    //         throw new Error('Error fetching users from the service');
+    //     }
+    // }
+    
+
+
 
     async updateUserStatus(id: string, status: string): Promise<any> {
         try {
