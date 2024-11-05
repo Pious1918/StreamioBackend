@@ -14,6 +14,7 @@ const videoController = new VideoController()
 
 router.get('/videos', videoController.getVideos)
 router.get('/video/:videoId' ,videoController.getVideo)
+router.get('/video/:videoId/hls',videoController.getHlsVideo)
 
 router.get('/getuseruploadedvideo',authMiddleware.authorize,videoController.getUseruploadedvideo)
 

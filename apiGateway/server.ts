@@ -27,7 +27,11 @@ app.use('/user-service', proxy('http://localhost:5001'));
 
 app.use('/video-service', proxy('http://localhost:5002'))
 
-
+// app.use('/video-proxy', createProxyMiddleware({
+//   target: 'https://d3qrczdrpptz8b.cloudfront.net',
+//   changeOrigin: true,
+//   pathRewrite: { '^/video-proxy': '' },
+// }));
 
 const port = process.env.SERVER_PORT || 5000
 

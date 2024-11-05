@@ -6,8 +6,14 @@ import ffmpeg from 'fluent-ffmpeg';
 // import fs from 'fs';
 // import path from 'path';
 import { IVideoController } from "../interfaces/Ivideocontroller.interface";
+// import path from "path";
+// import fs from 'fs';
+// import Ffmpeg from "fluent-ffmpeg";
 
 
+import fs from 'fs';
+import path from 'path';
+import Ffmpeg from 'fluent-ffmpeg';
 
 
 
@@ -25,70 +31,98 @@ export class VideoController implements IVideoController {
 
 
 
-    // public getVideo = async (req: IAuthRequest, res: Response) => {
-    //     try {
-    //         const { videoId } = req.params;
-    //         const videoData = await this._videoService.findVideo(videoId);
-    //         if (!videoData || !videoData.videolink) {
-    //             res.status(404).send("Video not found");
-    //             return;
-    //         }
 
-    //         const videolink = videoData.videolink;
-    //         const tempFilePath = path.resolve(__dirname, `temp-${videoId}.mp4`);
 
-    //         // Stream video using FFmpeg to a temporary file first
-    //         ffmpeg(videolink)
-    //             .inputOptions(['-re'])
-    //             .videoCodec('libx264')
-    //             .audioCodec('aac')
-    //             .outputOptions([
-    //                 '-preset veryfast',
-    //                 '-maxrate 3000k',
-    //                 '-bufsize 6000k',
-    //                 '-pix_fmt yuv420p',
-    //                 '-g 50',
-    //                 '-r 30',
-    //                 '-b:a 128k',
-    //                 '-strict experimental'
-    //             ])
-    //             .output(tempFilePath)
-    //             .on('end', () => {
-    //                 console.log("Temporary video file created, streaming to client.");
-    //                 res.setHeader('Content-Type', 'video/mp4');
 
-    //                 // Stream the file to client
-    //                 const readStream = fs.createReadStream(tempFilePath);
-    //                 readStream.pipe(res);
+    public getHlsVideo = async (req: IAuthRequest, res: Response) => {
+        console.log("Approached getHlsVideo");
 
-    //                 // Clean up after the stream ends
-    //                 readStream.on('end', () => {
-    //                     fs.unlinkSync(tempFilePath); // Delete temp file after streaming
-    //                     console.log("Streaming finished, temporary file deleted.");
-    //                 });
+        try {
+            const { videoId } = req.params;
 
-    //                 // Handle any errors in the read stream
-    //                 readStream.on('error', (streamErr) => {
-    //                     console.error("Error streaming video to client:", streamErr.message);
-    //                     if (!res.headersSent) {
-    //                         res.status(500).send("Error streaming video");
-    //                     }
-    //                 });
-    //             })
-    //             .on('error', (err) => {
-    //                 console.error("Error creating temporary video file:", err.message);
-    //                 if (!res.headersSent) {
-    //                     res.status(500).send("Error streaming video");
-    //                 }
-    //             })
-    //             .run();
-    //     } catch (error) {
-    //         console.error("Error in getVideo:", error);
-    //         if (!res.headersSent) {
-    //             res.status(500).send("Internal server error");
-    //         }
-    //     }
-    // };
+            // Retrieve video information
+            const videoData = await this._videoService.findVideo(videoId);
+            if (!videoData || !videoData.videolink) {
+                res.status(404).send("Video not found");
+                return;
+            }
+
+            const videolink = videoData.videolink;
+            console.log("Video link:", videolink);
+
+            // Define paths
+            const fileName = path.basename(videolink, path.extname(videolink));
+            const hlsOutputPath = path.join('./public', `${fileName}-hls`);
+            const playlistPath = path.join(hlsOutputPath, 'playlist.m3u8');
+
+
+            console.log("filename",fileName)
+            // Check if the playlist file already exists
+            if (!fs.existsSync(playlistPath)) {
+                console.log("HLS playlist does not exist, creating it...");
+
+                // Create output directory if it doesn't exist
+                if (!fs.existsSync(hlsOutputPath)) {
+                    try {
+                        fs.mkdirSync(hlsOutputPath, { recursive: true });
+                        console.log("Created directory for HLS output:", hlsOutputPath);
+                    } catch (error) {
+                        console.error("Directory creation error:", error);
+                        res.status(500).send("Error creating directory");
+                        return;
+                    }
+                }
+
+                // Convert video to HLS format using ffmpeg
+                Ffmpeg(videolink) // Use videolink here, not videoId
+                    .output(playlistPath) // Explicitly set the output path
+                    .outputOptions([
+                        '-preset fast',
+                        '-g 48',
+                        '-sc_threshold 0',
+                        '-map 0',
+                        '-c:a aac',
+                        '-ar 48000',
+                        '-b:a 128k',
+                        '-c:v h264',
+                        '-profile:v main',
+                        '-crf 20',
+                        '-b:v 1000k',
+                        '-maxrate 1000k',
+                        '-bufsize 2000k',
+                        '-hls_time 10',
+                        '-hls_playlist_type vod',
+                        '-hls_segment_filename', `${hlsOutputPath}/segment_%03d.ts`
+                    ])
+                    .on('end', () => {
+                        // console.log(`Conversion complete. HLS URL: /hls-output/${fileName}/playlist.m3u8`);
+                        console.log(hlsOutputPath);
+                        
+                        console.log("pahty",path.join(__dirname,"../../public",`${fileName}-hls`,"playlist.m3u8"))
+                        
+                        res.sendFile(path.join(__dirname,"../../public",`${fileName}-hls`,"playlist.m3u8"))
+                    })
+                    .on('error', err => {
+                        console.error('FFmpeg error:', err);
+                        res.status(500).send('Error processing video');
+                    })
+                    .run();
+            } else {
+                console.log("Serving existing HLS playlist");
+                console.log(hlsOutputPath);
+                console.log(fileName)
+                console.log("HLS Output Path (absolute):", path.resolve(hlsOutputPath));
+                const absolutePath = path.resolve(__dirname, "../../public", `${fileName}-hls`, "playlist.m3u8");
+                console.log('absolute path is ',absolutePath)
+                const hlsUrl = `http://localhost:5002/${fileName}-hls/playlist.m3u8`; // Update the port as needed
+                res.json({url:hlsUrl});
+           
+            }
+        } catch (error) {
+            console.error("Server-side error:", error);
+            res.status(500).json({ message: 'Server-side error', error: "error.message" });
+        }
+    }
 
 
 
@@ -106,58 +140,6 @@ export class VideoController implements IVideoController {
                 res.status(200).json(videoData)
             }
 
-
-
-
-
-            // Define the path for HLS files
-            // const hlsFolderPath = path.resolve(__dirname, `../../hls/hls-${videoId}`);
-            // const hlsPlaylistPath = path.join(hlsFolderPath, 'index.m3u8');
-
-            // // Check if HLS output folder exists
-            // if (!fs.existsSync(hlsFolderPath)) {
-            //     fs.mkdirSync(hlsFolderPath);
-            // }
-
-            // // Check if HLS playlist already exists
-            // if (fs.existsSync(hlsPlaylistPath)) {
-            //     console.log("HLS playlist already exists, streaming to client");
-            //     const hlsUrl = `${req.protocol}://${req.get('host')}/hls/hls-${videoId}/index.m3u8`;
-            //     console.log("hlser url", hlsUrl)
-            //     res.json({ message: 'haii' })
-            //     return
-
-            // }
-
-            // // Convert mp4 to HLS format with FFMPEG
-            // ffmpeg(videolink)
-            //     .videoCodec('libx264')
-            //     .audioCodec('aac')
-            //     .outputOptions([
-            //         '-preset veryfast',
-            //         '-g 48',                   // Group of Pictures
-            //         '-hls_time 10',            // Duration of each segment in seconds
-            //         '-hls_list_size 0',        // Keep all segments in the playlist
-            //         '-f hls',
-            //         '-hls_segment_filename', path.join(hlsFolderPath, 'segment-%03d.ts')
-            //     ])
-            //     .output(hlsPlaylistPath)
-            //     .on('end', () => {
-            //         console.log("HLS conversion completed, stream to client");
-            //         res.sendFile(hlsPlaylistPath, (err) => {
-            //             if (err) {
-            //                 console.log("error sending hls playlist", err.message);
-            //                 res.status(500).send("error streaming video");
-            //             }
-            //         });
-            //     })
-            //     .on('error', (err) => {
-            //         console.log("error creating hls video", err.message);
-            //         if (!res.headersSent) {
-            //             res.status(500).send("error processing video");
-            //         }
-            //     })
-            //     .run();
 
         } catch (error) {
             console.error(error);
