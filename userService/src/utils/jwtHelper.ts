@@ -42,6 +42,20 @@ export const generateToken = (user:IuserDocument):string =>{
     })
 }
 
+
+export const generateRefreshToken = (user:IuserDocument): string => {
+
+    const payload : IPayload= {
+        userId:user._id,
+        name:user.name,
+        email:user.email,
+        role:user.role,
+        status:user.status
+    }
+
+    return jwt.sign(payload, process.env.JWT_REFRESH_SECRET as string, { expiresIn: process.env.JWT_REFRESH_EXPIRY });
+};
+
 export const generateAdminToken = (admin:IadminDocument):string =>{
     const payload= {
         userId:admin._id,
@@ -59,9 +73,6 @@ export const generateAdminToken = (admin:IadminDocument):string =>{
 
 
 
-export const generateRefreshToken = (payload: IPayload): string => {
-    return jwt.sign(payload, process.env.JWT_REFRESH_SECRET as string, { expiresIn: process.env.JWT_REFRESH_EXPIRY });
-};
 
 
 export const verifyToken = (token: string): IPayload => {

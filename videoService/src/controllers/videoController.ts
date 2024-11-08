@@ -1,19 +1,20 @@
 import { Request, Response } from "express";
-import { getPresignedUrl } from "../utils/s3uploader";
+import { getPresignedUrl,  } from "../utils/s3uploader";
 import { IAuthRequest } from "../middleware/authmiddle";
 import { videoService } from "../services/videoService";
 import ffmpeg from 'fluent-ffmpeg';
-// import fs from 'fs';
-// import path from 'path';
+
 import { IVideoController } from "../interfaces/Ivideocontroller.interface";
-// import path from "path";
-// import fs from 'fs';
-// import Ffmpeg from "fluent-ffmpeg";
 
+import amqp from 'amqplib';
 
+// import crypto from 'crypto'
 import fs from 'fs';
 import path from 'path';
 import Ffmpeg from 'fluent-ffmpeg';
+
+// const randomVideoName = (bytes=32)=>crypto.randomBytes(bytes).toString('hex')
+const RABBITMQ_URL = 'amqp://localhost'; // RabbitMQ URL, 
 
 
 
@@ -56,7 +57,7 @@ export class VideoController implements IVideoController {
             const playlistPath = path.join(hlsOutputPath, 'playlist.m3u8');
 
 
-            console.log("filename",fileName)
+            console.log("filename", fileName)
             // Check if the playlist file already exists
             if (!fs.existsSync(playlistPath)) {
                 console.log("HLS playlist does not exist, creating it...");
@@ -97,10 +98,10 @@ export class VideoController implements IVideoController {
                     .on('end', () => {
                         // console.log(`Conversion complete. HLS URL: /hls-output/${fileName}/playlist.m3u8`);
                         console.log(hlsOutputPath);
-                        
-                        console.log("pahty",path.join(__dirname,"../../public",`${fileName}-hls`,"playlist.m3u8"))
-                        
-                        res.sendFile(path.join(__dirname,"../../public",`${fileName}-hls`,"playlist.m3u8"))
+
+                        console.log("pahty", path.join(__dirname, "../../public", `${fileName}-hls`, "playlist.m3u8"))
+
+                        res.sendFile(path.join(__dirname, "../../public", `${fileName}-hls`, "playlist.m3u8"))
                     })
                     .on('error', err => {
                         console.error('FFmpeg error:', err);
@@ -113,10 +114,10 @@ export class VideoController implements IVideoController {
                 console.log(fileName)
                 console.log("HLS Output Path (absolute):", path.resolve(hlsOutputPath));
                 const absolutePath = path.resolve(__dirname, "../../public", `${fileName}-hls`, "playlist.m3u8");
-                console.log('absolute path is ',absolutePath)
+                console.log('absolute path is ', absolutePath)
                 const hlsUrl = `http://localhost:5002/${fileName}-hls/playlist.m3u8`; // Update the port as needed
-                res.json({url:hlsUrl});
-           
+                res.json({ url: hlsUrl });
+
             }
         } catch (error) {
             console.error("Server-side error:", error);
@@ -175,6 +176,168 @@ export class VideoController implements IVideoController {
             res.status(500).json({ error: "hai" });
         }
     }
+
+
+
+
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
+    // **function to upload video to s3 bucket and then convert to HLS format and saving it
+
+    // public convertToHLS = async (req: IAuthRequest, res: Response): Promise<void> => {
+
+    //     const userId = req.user?.userId;
+
+    //     // Check if userId is present
+    //     if (!userId) {
+    //         res.status(403).json({ error: 'User ID is missing in token' });
+    //         return;
+    //     }
+
+    //     const { title, description, visibility, payment, price, fileUrl } = req.body;
+    //     console.log(title, description, visibility, payment, price, fileUrl)
+
+    //     // Define paths for HLS output in the public folder
+    //     const fileName = path.basename(fileUrl, path.extname(fileUrl));
+    //     const hlsOutputPath = path.join(__dirname, '../../public', `${fileName}-hls`);
+
+
+    //     // Ensure the output directory exists
+    //     if (!fs.existsSync(hlsOutputPath)) {
+    //         fs.mkdirSync(hlsOutputPath, { recursive: true });
+    //     }
+
+    //     const playlistPath = path.join(hlsOutputPath, 'playlist.m3u8');
+    //     const hlsSegmentPath = path.join(hlsOutputPath, 'segment_%03d.ts');
+
+    //     Ffmpeg(fileUrl)
+    //         .output(playlistPath)
+    //         .outputOptions([
+    //             '-preset fast',
+    //             '-g 48',
+    //             '-sc_threshold 0',
+    //             '-map 0',
+    //             '-c:a aac',
+    //             '-ar 48000',
+    //             '-b:a 128k',
+    //             '-c:v h264',
+    //             '-profile:v main',
+    //             '-crf 20',
+    //             '-b:v 1000k',
+    //             '-maxrate 1000k',
+    //             '-bufsize 2000k',
+    //             '-hls_time 10',
+    //             '-hls_playlist_type vod',
+    //             '-hls_segment_filename', hlsSegmentPath,
+    //         ])
+    //         .on('end', async () => {
+    //             console.log('Conversion complete. Uploading to S3...');
+
+    //             try {
+    //                 const playlistKey = await uploadDirectoryToS3(hlsOutputPath, `${fileName}/`); // Use fileName as prefix
+
+    //                 // Optionally delete temporary files after upload
+    //                 fs.rmSync(hlsOutputPath, { recursive: true });
+    //                 console.log("playlistkeh@controller", playlistKey)
+
+    //                 const savedVideo = await this._videoService.saveVideo(
+    //                     { title, description, visibility, paid: payment, price, videolink: playlistKey as string },
+    //                     userId
+    //                 );
+
+    //                 res.status(200).json({ message: 'Video saved successfully', data: savedVideo });
+
+
+
+
+    //                 // res.status(200).json({ message: `HLS files uploaded to S3 under prefix: ${playlistKey}/` });
+    //             } catch (error) {
+    //                 console.error('Error uploading to S3:', error);
+    //                 res.status(500).send('Error uploading HLS files to S3');
+    //             }
+    //         })
+    //         .on('error', err => {
+    //             console.error('FFmpeg error:', err);
+    //             res.status(500).send('Error processing video');
+    //         })
+    //         .run();
+
+
+
+    // }
+
+// **convertToHLS() end here
+
+
+
+// **-------------------------------------------------------------------------
+public convertToHLS = async(req:IAuthRequest , res:Response):Promise<void>=>{
+    const userId =req.user?.userId
+
+    if(!userId){
+        res.status(403).json({error:'userid is missing in the token'})
+        return 
+    }
+
+    const { title, description, visibility, payment, price, fileUrl } = req.body;
+    const fileName = path.basename(fileUrl, path.extname(fileUrl));
+
+    try {
+        // Connect to RabbitMQ and create a channel
+        const connection = await amqp.connect(RABBITMQ_URL);
+        const channel = await connection.createChannel();
+        const queue = 'video_conversion_queue';
+
+        // Ensure the queue exists
+        await channel.assertQueue(queue, { durable: true });
+
+        // Prepare message data for video conversion
+        const message = {
+            userId,
+            title,
+            description,
+            visibility,
+            payment,
+            price,
+            fileUrl,
+            fileName,
+        };
+
+        // Send message to the queue
+        channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)), {
+            persistent: true,
+        });
+
+        console.log('Video conversion task sent to RabbitMQ');
+        res.status(200).json({ message: 'Video conversion task sent successfully' });
+
+        // Close the channel and connection
+        setTimeout(() => {
+            channel.close();
+            connection.close();
+        }, 500);
+    } catch (error) {
+        console.error('Error sending task to RabbitMQ:', error);
+        res.status(500).send('Error processing video conversion');
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     public videoDataSave = async (req: IAuthRequest, res: Response): Promise<void> => {

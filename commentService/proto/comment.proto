@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+service CommentService {
+  rpc PostComment (CommentRequest) returns (CommentResponse);
+  rpc GetComments (GetCommentsRequest) returns (GetCommentsResponse);
+}
+
+message CommentRequest {
+  string userId = 1;
+  string videoId = 2;
+  string content = 3;
+}
+
+message CommentResponse {
+  string status = 1;
+  string message = 2;
+  string comment = 3;
+}
+
+message GetCommentsRequest {
+  string videoId = 1;
+}
+
+message GetCommentsResponse {
+  repeated string comments = 1;
+}

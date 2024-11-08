@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { NextFunction, Request, Response, Router } from "express";
 import express from "express";
 
 import { Middleware } from "../middlewares/authMiddleware";
@@ -11,6 +11,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import upload, { uploadToS3 } from "../utils/uploader";
+import { refreshTokenHandler } from "../utils/refreshTokenhandler";
 
 const userController = new UserController()
 const middleWare = new Middleware()
@@ -41,6 +42,10 @@ router.put('/userds/:id/status', userController.updateUserStatus)
 
 router.post('/subscribeee' , middleWare.authorize , userController.subscribeuser)
 router.post('/unsubscribe' , middleWare.authorize , userController.unsubscribeuser)
+
+router.post('/refresh-token', (req: Request, res: Response, next: NextFunction) => {
+    refreshTokenHandler(req, res, next).catch(next); // Use `.catch(next)` to handle errors
+});
 
 
 

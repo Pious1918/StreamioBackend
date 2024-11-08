@@ -17,8 +17,8 @@ export class Middleware {
         console.log("fdfdsfsdfsdfsd",req.body)
         if (!token) {
             console.log("hit but no token")
-            res.status(403).json({ error: 'No token provided' });
-            return;
+            return res.status(403).json({ error: 'No token provided' });
+            
         }
 
         try {
@@ -58,12 +58,12 @@ export class Middleware {
 
             if(error instanceof jwt.TokenExpiredError){
                 console.log("token expired")
-                 res.status(401).json({ message: 'Token expired' });
+                return res.status(401).json({ message: 'Token expired' });
 
             }
             console.log("hit but no token")
-            res.status(401).json({ error: "Unauthorized" });
-            return;
+            return res.status(401).json({ error: "Unauthorized" });
+            
         }
     }
 

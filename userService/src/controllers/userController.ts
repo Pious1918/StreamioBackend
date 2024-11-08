@@ -2,7 +2,7 @@
 
 import { NextFunction, Request, Response } from "express";
 import { UserService } from "../services/userService";
-import { generateAdminToken, generateToken } from "../utils/jwtHelper";
+import { generateAdminToken, generateRefreshToken, generateToken } from "../utils/jwtHelper";
 import { IUserController } from "../interfaces/uS.controller.interface";
 import { ObjectId } from 'mongodb';
 import IAuthRequest from "../middlewares/authMiddleware";
@@ -85,7 +85,8 @@ export class UserController implements IUserController {
 
 
             const token = generateToken(result)
-            res.status(200).json({ message: 'Login successfull', token })
+            const userRefreshtoken = generateRefreshToken(result)
+            res.status(200).json({ message: 'Login successfull', token , userRefreshtoken })
 
         } catch (error: any) {
 
