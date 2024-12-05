@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+
+
+service UserService{
+
+    rpc GetChannelDetails (UserRequest) returns (UserResponse);
+    rpc GetViewerDetails (ViewerRequest) returns (ViewerResponse);
+
+}
+
+
+message UserRequest {
+    string _id = 1;
+}
+
+message UserResponse {
+    string _id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+
+message ViewerRequest{
+    string _id = 1;
+}
+
+message ViewerResponse {
+    string _id = 1;
+    string name = 2;
+    string email = 3;
+    repeated string following = 4; // Array of object IDs representing the following field
+
+}

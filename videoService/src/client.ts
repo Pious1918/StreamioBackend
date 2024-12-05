@@ -1,41 +1,28 @@
-// import * as grpc from '@grpc/grpc-js';
-// import * as protoLoader from '@grpc/proto-loader';
-// import path from 'path';
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
+import path from 'path';
 
 // // const PROTO_PATH = path.resolve(__dirname, '../../commentService/src/comment.proto');
-// const PROTO_PATH = path.resolve(__dirname, '../../commentService/src/comment.proto');
+const PROTO_PATH = path.resolve(__dirname, '../../commentService/proto/comment.proto');
+const USER_PROTO_PATH = path.resolve(__dirname, '../../userService/proto/user.proto');
 
-// const packageDef = protoLoader.loadSync(PROTO_PATH, {});
-// const commentProto = grpc.loadPackageDefinition(packageDef) as grpc.GrpcObject & {
-//   CommentService: grpc.ServiceClientConstructor;
-// };
+const packageDefinition = protoLoader.loadSync(PROTO_PATH, {});
+const commentPackage = grpc.loadPackageDefinition(packageDefinition)
+const commentProto:any = commentPackage.CommentService
 
-// interface CommentServiceClient extends grpc.Client {
-//   GetComments(
-//     call: { videoId: string },
-//     callback: (error: grpc.ServiceError | null, response: { comments: string[] }) => void
-//   ): void;
-// }
+const userPackageDefinition = protoLoader.loadSync(USER_PROTO_PATH , {})
+const userPackage = grpc.loadPackageDefinition(userPackageDefinition)
+const userProto: any = userPackage.UserService
 
-// export class CommentServiceClientWrapper {
-//   private client: CommentServiceClient;
+const client = new commentProto(
+    "localhost:50051",
+    grpc.credentials.createInsecure()
+)
 
-//   constructor() {
-//     this.client = new commentProto.CommentService(
-//       'localhost:50052', // Adjust the address as per your setup
-//       grpc.credentials.createInsecure()
-//     ) as unknown as CommentServiceClient;
-//   }
+const client2 = new userProto(
+    "localhost:50054",
+    grpc.credentials.createInsecure()
+)
 
-//   public getAllComments(videoId: string): Promise<string[]> {
-//     return new Promise((resolve, reject) => {
-//       this.client.GetComments({ videoId }, (error, response) => {
-//         if (error) {
-//           reject(error);
-//         } else {
-//           resolve(response.comments);
-//         }
-//       });
-//     });
-//   }
-// }
+
+export {client , client2}

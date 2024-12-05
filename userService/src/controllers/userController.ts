@@ -6,9 +6,16 @@ import { generateAdminToken, generateRefreshToken, generateToken } from "../util
 import { IUserController } from "../interfaces/uS.controller.interface";
 import { ObjectId } from 'mongodb';
 import IAuthRequest from "../middlewares/authMiddleware";
-import { getPresignedUrl } from "../utils/up";
+import { deleteImagefroms3, generatePresignedURL, getPresignedUrl } from "../utils/up";
+import generateOTP from "../utils/otpGenerator";
+import { sendEmail } from "../utils/sendEmail";
+import bcrypt from 'bcryptjs'
 
-
+import fs from 'fs'
+import path from 'path'
+import { client } from "../client";
+const templatePath = path.join(__dirname, '../utils/templates/emailtemplate.html')
+const templateContent = fs.readFileSync(templatePath, 'utf-8');
 
 
 
@@ -67,26 +74,134 @@ export class UserController implements IUserController {
 
 
     //loggin in the registered user
+    // public loginuser = async (req: Request, res: Response, next: NextFunction) => {
+    //     const { email, password } = req.body
+    //     console.log(email)
+
+    //     try {
+
+    //         const result = await this._userService.login(email, password)
+    //         console.log("data is ", result)
+
+    //         // Check if the user's status is active
+    //         if (result.status !== 'active') {
+
+    //             res.status(403).json({ message: 'User is blocked' });
+    //             return
+    //         }
+
+
+    //         const token = generateToken(result)
+    //         // const userRefreshtoken = generateRefreshToken(result)
+    //         // res.status(200).json({ message: 'Login successfull', token, userRefreshtoken })
+    //         res.status(200).json({ message: 'Login successfull', token })
+
+    //     } catch (error: any) {
+
+
+    //         if (error.message === 'invalid email') {
+    //             res.status(404).json({ error: 'user not found' })
+    //         }
+    //         if (error.message == 'Invalid password') {
+    //             res.status(401).json({ error: 'Invalid password' })
+    //         }
+
+    //         next(error)
+    //     }
+    // }
+
+
+
     public loginuser = async (req: Request, res: Response, next: NextFunction) => {
-        const { email, password } = req.body
-        console.log(email)
+        const { email, password } = req.body;
+        console.log(email);
+
+        try {
+            const user = await this._userService.findByemail(email);
+
+            if (!user) {
+                // User with the provided email doesn't exist
+                res.status(200).json({ success: false, message: 'User not found' });
+                return;
+            }
+
+            // Check password validity
+            const isValidPassword = await bcrypt.compare(password, user.password);
+            if (!isValidPassword) {
+                // Password does not match
+                res.status(200).json({ success: false, message: 'Invalid password' });
+                return;
+            }
+
+            // Check if the user is blocked
+            if (user.status !== 'active') {
+                res.status(200).json({ success: false, message: 'User is blocked' });
+                return;
+            }
+
+            // Generate a token if login is successful
+            const token = generateToken(user);
+            res.status(200).json({ success: true, message: 'Login successful', token });
+
+        } catch (error: any) {
+            console.error("Error during login:", error);
+            res.status(500).json({ error: 'An unexpected error occurred' });
+            next(error);
+        }
+    };
+
+
+
+
+    public generateotp = async (req: Request, res: Response) => {
+        const { email } = req.body
+        console.log("emailis", email)
 
         try {
 
-            const result = await this._userService.login(email, password)
-            console.log("data is ", result)
+            const existinguser = await this._userService.findByemail(email as string)
 
-            // Check if the user's status is active
-            if (result.status !== 'active') {
+            if (existinguser) {
 
-                res.status(403).json({ message: 'User is blocked' });
+                const otpresult = await this._userService.generateOtpForUser(email);
+
+                // Check if there was an error (e.g., user not found)
+                if (otpresult.error) {
+                    if (otpresult.error === 'no such user exists') {
+                        res.status(404).json({ error: 'User not found' });
+                    }
+                    // Handle other potential errors here if needed
+                    res.status(404).json({ error: 'Unable to generate OTP' });
+                }
+
+                // OTP was successfully generated
+                console.log("otp", otpresult);
+                console.log("otp", otpresult)
+                const otpValue = otpresult.otp ?? 'N/A'; // Use 'N/A' as a fallback value or any default string
+
+                const customizedHtml = templateContent.replace('{{otp}}', otpValue);
+
+                await sendEmail({
+                    from: "nspious1999@gmail.com",
+                    to: email,
+                    subject: 'Password Reset OTP',
+                    text: `Your OTP for resetting the password is ${otpresult.otp}`,
+                    html: customizedHtml
+                })
+
+                res.status(200).json({ message: 'OTP sent successfully' });
+
+
+            }
+            else {
+                console.log("no such user")
+                res.json({ message: 'no such email exists' })
                 return
             }
 
 
-            const token = generateToken(result)
-            const userRefreshtoken = generateRefreshToken(result)
-            res.status(200).json({ message: 'Login successfull', token , userRefreshtoken })
+
+
 
         } catch (error: any) {
 
@@ -98,7 +213,51 @@ export class UserController implements IUserController {
                 res.status(401).json({ error: 'Invalid password' })
             }
 
-            next(error)
+
+        }
+    }
+
+
+    public submitotp = async (req: Request, res: Response) => {
+        const { otp, email } = req.body;
+        console.log("otp received @backend", otp, email);
+
+        try {
+            const checkVAlidOtp = await this._userService.checkReceivedotp(otp, email);
+
+            if (!checkVAlidOtp) {
+                // If the OTP is invalid, send the response and return immediately
+                res.json({ message: 'Invalid otp' });
+                return
+            }
+
+            // Send success response if the OTP is valid
+            res.status(200).json({ checkVAlidOtp, message: 'success' });
+            return
+        } catch (error) {
+            console.error("Error validating OTP:", error);
+            res.status(500).json({ message: 'Internal server error' });
+            return
+        }
+    };
+
+
+
+    public resetpassword = async (req: Request, res: Response) => {
+        const { password, email } = req.body
+
+        console.log("emai and pass", password, email)
+
+        try {
+            const result = await this._userService.resetPassword(email, password)
+            if (result.success) {
+                res.status(200).json({ message: 'Password reset successful' });
+            } else {
+                res.status(400).json({ message: result.message });
+            }
+        } catch (error) {
+            console.error('Error resetting password:', error);
+            res.status(500).json({ message: 'Internal server error' });
         }
     }
 
@@ -111,6 +270,59 @@ export class UserController implements IUserController {
         res.status(200).json({ message: 'user details', userProfile })
 
     }
+
+    public getSubscriberlist = async (req: IAuthRequest, res: Response) => {
+        try {
+            const userId = req.user?.userId;
+    
+            if (!userId) {
+                 res.status(400).json({ message: 'User ID is required' });
+                 return
+            }
+    
+            const getSublist = await this._userService.getsublist(userId);
+    
+            // console.log("userid @ getsublist", userId);
+    
+            
+            // console.log("sublist after fetching @ controller",getSublist?.subscribers)
+
+            const subscribers = getSublist?.subscribers
+
+            res.status(200).json({ message: 'success', data: subscribers });
+    
+        } catch (error) {
+            console.error('Error fetching subscriber list:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    };
+    
+    public getfollowinglist = async (req: IAuthRequest, res: Response) => {
+        try {
+            const userId = req.user?.userId;
+    
+            if (!userId) {
+                 res.status(400).json({ message: 'User ID is required' });
+                 return
+            }
+    
+            const getfollowlist = await this._userService.getFollowinglist(userId);
+    
+            console.log("userid @ getsublist", userId);
+    
+            
+            console.log("following after fetching @ controller",getfollowlist?.following)
+
+            const following = getfollowlist?.following
+
+            res.status(200).json({ message: 'success', followingdata: following });
+    
+        } catch (error) {
+            console.error('Error fetching subscriber list:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    };
+    
 
 
     public searchuser = async (req: IAuthRequest, res: Response, next: NextFunction) => {
@@ -129,6 +341,48 @@ export class UserController implements IUserController {
         }
     }
 
+    public userCount = async (req: Request, res: Response) => {
+        try {
+            const userCounts = await this._userService.usercount(); // Call service method
+            res.status(200).json(userCounts); // Send counts in response
+        } catch (error) {
+            console.error("Internal server error:", error);
+            res.status(500).send("Internal server error");
+        }
+    };
+
+
+
+
+    public getUploadedvideos = async (req: IAuthRequest, res: Response) => {
+
+        console.log("Hai from getUploadedvideos")
+        try {
+            const userId = req.user?.userId;
+
+            console.log("userId", userId)
+            const request = { uploaderId: userId };
+
+            client.GetVideosByUploader(request, (error: any, response: any) => {
+                if (error) {
+                    console.error("Error fetching videos:", error);
+                    res.status(500).send("Failed to fetch videos");
+                }
+
+                if (response && response.videos) {
+                    console.log("fetching from videoservice in userservice", response.videos);
+                    res.status(200).json(response.videos);
+                } else {
+                    res.status(404).send("No videos found");
+                }
+            });
+        } catch (error) {
+            console.error("Internal server error:", error);
+            res.status(500).send("Internal server error");
+        }
+    };
+
+
 
 
     public genPresignedurl = async (req: IAuthRequest, res: Response) => {
@@ -141,6 +395,32 @@ export class UserController implements IUserController {
         }
     }
 
+
+    public deletefroms3 = async (req: Request, res: Response) => {
+        const { imageurl } = req.body
+        console.log(imageurl)
+
+        try {
+            const deleteImage = await deleteImagefroms3(imageurl)
+            res.json({ deleteImage })
+
+        } catch (error) {
+            res.status(500).json({ error: 'there is an error' })
+
+        }
+    }
+
+
+
+    public generateCommonPresigned = async (req: Request, res: Response) => {
+        const { fileName, fileType, bucketname } = req.body
+        try {
+            const genPresigner = await generatePresignedURL(bucketname, fileType, fileName)
+            res.json({ genPresigner })
+        } catch (error) {
+            res.status(500).json({ error: 'there is an error' })
+        }
+    }
 
 
 
@@ -249,12 +529,15 @@ export class UserController implements IUserController {
             // Get page and limit from query params, with defaults for the first page and 6 items per page
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 6;
+            const search = typeof req.query.search === 'string' ? req.query.search : '';
+
+            console.log("search term @controller", search)
 
             console.log(`page is ${page} limit : ${limit}`)
             console.log("Controller: loadAdminDashboard");
 
 
-            const allUsers = await this._userService.getAllUsers(page, limit);
+            const allUsers = await this._userService.getAllUsers(page, limit, search);
             // Calculate total users and pages for pagination
             const totalUsers = await this._userService.countAllUsers();
             const totalPages = Math.ceil(totalUsers / limit);
@@ -264,7 +547,7 @@ export class UserController implements IUserController {
             // console.log("Fetched Users:", allUsers);
 
 
-            res.status(200).json({ 
+            res.status(200).json({
                 users: allUsers,
                 totalPages,
                 currentPage: page

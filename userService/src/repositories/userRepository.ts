@@ -5,10 +5,11 @@ import { FilterQuery } from "mongoose";
 import userModel, { IuserDocument } from "../models/userModel";
 import { BaseRepository } from "./baseRepo";
 import { IUserRepository } from "../interfaces/user.repo.interface";
+import otpModel from "../models/otpModel";
 
 
 
-export class userRepository extends BaseRepository<IuserDocument> implements IUserRepository{
+export class userRepository extends BaseRepository<IuserDocument> implements IUserRepository {
     constructor() {
 
         super(userModel)
@@ -19,11 +20,51 @@ export class userRepository extends BaseRepository<IuserDocument> implements IUs
         return this.findOne({ email })
     }
 
+    async getAllsubscribers(userId :string){
+        // console.log("@repo sub",)
+
+       return await userModel.findById(userId).populate('subscribers', 'name email'); // Populate subscribers with name and email only
+
+        // console.log("@ repo user",user) 
+    }
+
+    async getAllfollowing(userId :string){
+        console.log("@repo following list sub",)
+
+       return await userModel.findById(userId).populate('following', 'name email'); // Populate subscribers with name and email only
+
+        // console.log("@ repo user",user) 
+    }
+
     async createUser(userData: Partial<IuserDocument>): Promise<IuserDocument | null> {
         return this.save(userData)
     }
 
+    async saveOtp(email: string, otp: string, expiresAt: Date): Promise<void> {
+        await otpModel.create({ email, otp, expiresAt });
 
+    }
+
+    async findotpByEmailandotp(email: string, otp: string) {
+
+        console.log("reached @userrepo")
+        return await otpModel.findOne({ email, otp })
+    }
+
+
+    async updatePasswordByEmail(email: string, newPassword: string) {
+        try {
+            const result = await userModel.findOneAndUpdate(
+                { email: email },
+                { password: newPassword },
+                { new: true }
+            )
+            return result
+        } catch (error) {
+            console.error('Error in updatePasswordByEmail repository method:', error);
+            throw error;
+        }
+    }
 
     async updateProfileByUserId(userId: any, updatedFields: any): Promise<any> {
         try {
@@ -87,29 +128,29 @@ export class userRepository extends BaseRepository<IuserDocument> implements IUs
         }
     }
 
-    ///get all users sorted by creation date
-    // async getAllUsers(): Promise<IuserDocument[]> {
-    //     try {
-    //         const users = await userModel.find().sort({ createdAt: -1 });;
-    //         return users;
-    //     } catch (error) {
-    //         console.error("Error in getAllUsers repository:", error);
-    //         throw new Error('Error fetching users from the database');
-    //     }
-    // }
-// Repository layer
-async getAllUsers(limit: number, offset: number): Promise<IuserDocument[]> {
-    try {
-        const users = await userModel.find()
-            .sort({ createdAt: -1 }) // Sorting by creation date, descending
-            .limit(limit)
-            .skip(offset); // Offset for pagination
-        return users;
-    } catch (error) {
-        console.error("Error in getAllUsers repository:", error);
-        throw new Error('Error fetching users from the database');
+
+    async getAllUsers(limit: number, offset: number, search: string): Promise<IuserDocument[]> {
+        try {
+
+
+            console.log("@userrep", search)
+
+
+            const query: any = search ? {
+                name: { $regex: search, $options: 'i' } // Case-insensitive search by name
+            } : {};
+
+
+            const users = await userModel.find(query)
+                .sort({ createdAt: -1 }) // Sorting by creation date, descending
+                .limit(limit)
+                .skip(offset); // Offset for pagination
+            return users;
+        } catch (error) {
+            console.error("Error in getAllUsers repository:", error);
+            throw new Error('Error fetching users from the database');
+        }
     }
-}
 
 
 
@@ -122,6 +163,21 @@ async getAllUsers(limit: number, offset: number): Promise<IuserDocument[]> {
             throw new Error(`Error in updating user status`);
         }
     }
+
+
+    async userCount() {
+        try {
+            const totalUsers = await userModel.countDocuments(); // Count all users
+            const activeUsers = await userModel.countDocuments({ status: "active" }); // Count active users
+            const blockedUsers = await userModel.countDocuments({ status: "blocked" }); // Count blocked users
+    
+            return { totalUsers, activeUsers, blockedUsers }; // Return counts as an object
+        } catch (error) {
+            console.error("Error counting users:", error);
+            throw error;
+        }
+    }
+    
 
 
 

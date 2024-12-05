@@ -25,7 +25,7 @@ export async function startWorker(){
         
         if(msg!==null){
             const message = JSON.parse(msg.content.toString());
-            const {userId, title, description, visibility, payment, price, fileUrl, fileName} =message
+            const {userId, title, description, visibility, payment, price, videoUrl, fileName , thumbnailUrl , category} =message
 
 
 
@@ -37,7 +37,7 @@ export async function startWorker(){
             const playlistPath = path.join(hlsOutputPath, 'playlist.m3u8');
             const hlsSegmentPath = path.join(hlsOutputPath, 'segment_%03d.ts');
 
-            Ffmpeg(fileUrl)
+            Ffmpeg(videoUrl)
                 .output(playlistPath)
                 .outputOptions([
                     '-preset fast',
@@ -75,6 +75,8 @@ export async function startWorker(){
                                 paid: payment,
                                 price,
                                 videolink: playlistKey as string,
+                                category:category,
+                                thumbnail:thumbnailUrl
                             },
                             userId
                         );

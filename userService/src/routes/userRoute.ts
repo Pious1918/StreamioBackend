@@ -12,8 +12,10 @@ import path from 'path';
 import fs from 'fs';
 import upload, { uploadToS3 } from "../utils/uploader";
 import { refreshTokenHandler } from "../utils/refreshTokenhandler";
+import { AdminController } from "../controllers/adminController";
 
 const userController = new UserController()
+const adminController = new AdminController()
 const middleWare = new Middleware()
 
 const router = Router()
@@ -22,20 +24,34 @@ const router = Router()
 router.post('/register', userController.registerUser)
 router.get('/check-email', userController.checkEmail)
 router.post('/login', userController.loginuser)
+router.post('/generateotp', userController.generateotp)  
+router.post('/submitotp', userController.submitotp)
+router.post('/resetpassword', userController.resetpassword)
 router.get('/userprofile', middleWare.authorize, userController.getUserProfile)
-router.get('/users', middleWare.authorize, userController.searchuser)
+router.get('/subscribersList', middleWare.authorize, userController.getSubscriberlist)
 
+router.get('/followingList', middleWare.authorize, userController.getfollowinglist)
+
+router.get('/videos',middleWare.authorize, userController.getUploadedvideos)
+// router.get('/privatevideos',middleWare.authorize, userController.getUploadedvideos)
+router.get('/users', middleWare.authorize, userController.searchuser)
+router.get('/countuser', userController.userCount)
 
 // router.get('/getbycode', middleWare.authorize, userController.getUserProfile)
 router.post('/update', middleWare.authorize, userController.updateUserData)
 router.post('/uploadProfilePicture', middleWare.authorize,userController.updateProfilePic)
 
 router.post('/generate-presigned-url', middleWare.authorize, userController.genPresignedurl)
+router.post('/generateCommonPresigner', adminController.gencommonPresignedurl)
+router.post('/deletefroms3', userController.deletefroms3)
+router.post('/deletebanner', adminController.deletebanner)
 
 // // Admin routes 
 router.post('/adminlogin', userController.adminLogin)
 // router.post('/adminregister', userController.registerAdmin)
 router.get('/userlist', userController.loadAdminDashboard)
+router.post('/savebanner', adminController.saveBanner)
+router.get('/getbanner', adminController.getBanner)
 router.put('/userds/:id/status', userController.updateUserStatus)
 
 

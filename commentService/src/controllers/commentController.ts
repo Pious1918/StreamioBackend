@@ -1,14 +1,7 @@
 import { Request, Response } from 'express'
-
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
 import IAuthRequest from '../interfaces/requestInterfaces';
 import { CommentService } from '../services/commentService';
 
-const PROTO_PATH = __dirname + '/../comment.proto';
-const packageDef = protoLoader.loadSync(PROTO_PATH, {})
-const commentProto = (grpc.loadPackageDefinition(packageDef) as any)
-console.log("comementporot", commentProto)
 
 
 
@@ -62,47 +55,29 @@ export class CommentController {
     }
 
 
-    // gRPC server method for getting comments
-    // private async getCommentsGRPC(call: any, callback: any): Promise<void> {
-    //     try {
-    //         const { videoId } = call.request;
-    //         const comments = await this._commentService.getComments(videoId);
-    //         callback(null, { comments });
-    //     } catch (error) {
-    //         callback(error);
-    //     }
-    // }
-    // private async postCommentGRPC(call: any, callback: any): Promise<void> {
-    //     try {
-    //       const { userId, videoId, content } = call.request;
-    //       const comment = await this._commentService.postComment(userId, videoId, content);
-    //       callback(null, { status: 'success', message: 'Comment posted successfully', comment });
-    //     } catch (error) {
-    //       callback(error);
-    //     }
-    //   }
+    public replyComment = async (req: IAuthRequest, res: Response) => {
+        try {
 
+            const userId = req.user?.userId
+            console.log(req.body)
+            const commentId = req.body.cId
+            const reply = req.body.reply
+            if (!userId) {
+                res.status(400).send("User is not authenticated");
+                return
+            }
 
-
-
-
-    // // Method to start the gRPC server
-    // public startGRPCServer(): void {
-    //     const server = new grpc.Server();
-    //     server.addService(commentProto.CommentService.service, {
-    //         PostComment: this.postCommentGRPC.bind(this),
-    //         GetComments: this.getCommentsGRPC.bind(this),
-    //     });
-
-    //     server.bindAsync('0.0.0.0:50052', grpc.ServerCredentials.createInsecure(), (error, port) => {
-    //         if (error) {
-    //             console.error('Failed to start gRPC server:', error);
-    //         } else {
-    //             console.log(`gRPC Server running on port ${port}`);
-    //             server.start();
-    //         }
-    //     });
-    // }
+            console.log("userId commentId reply", userId, commentId, reply)
+            const replyData = await this._commentService.addReply(userId, commentId, reply)
+            res.status(200).json({
+                message: "Reply added successfully",
+                reply: replyData // Assuming `replyData` is returned from the service
+            });
+        } catch (error) {
+            console.error("Error in replyComment:", error);
+             res.status(500).send("Internal server error");
+        }
+    }
 
 
 }

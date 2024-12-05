@@ -30,6 +30,7 @@ app.use('/user-service', proxy('http://localhost:5001'));
 app.use('/video-service', proxy('http://localhost:5002'))
 
 app.use('/comment-service', proxy('http://localhost:5003'))
+app.use('/live-service', proxy('http://localhost:5005'))
 
 
 const port = process.env.SERVER_PORT || 5000

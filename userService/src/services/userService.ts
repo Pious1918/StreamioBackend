@@ -10,6 +10,7 @@ import { IadminDocument } from '../models/adminModel';
 import { IUserService } from '../interfaces/uS.service.interface';
 import { uploadToS3 } from '../utils/uploader';
 import { adminRepostiory } from '../repositories/adminRepository';
+import generateOTP from '../utils/otpGenerator';
 
 dotenv.config()
 
@@ -57,7 +58,7 @@ export class UserService implements IUserService {
 
 
 
-    
+
     async login(email: string, password: string): Promise<IuserDocument> {
 
         const user = await this._userRepository.findByEmail(email)
@@ -75,6 +76,48 @@ export class UserService implements IUserService {
 
         return user
     }
+
+
+
+    async generateOtpForUser(email: string): Promise<{ error?: string, otp?: string }> {
+        const existingUser = await this._userRepository.findByEmail(email)
+
+
+        if (!existingUser) {
+            console.log("not exis")
+            throw new Error('invalid email')
+        }
+
+        const otp = generateOTP();
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+
+        await this._userRepository.saveOtp(email, otp, expiresAt)
+        return { otp }
+
+    }
+
+    async checkReceivedotp(otp: string, email: string) {
+        console.log("reached @chekservice")
+        const emailExists = await this._userRepository.findotpByEmailandotp(email, otp)
+
+        return emailExists
+    }
+
+    async resetPassword(email: string, newPassword: string) {
+        try {
+            const hashPassword = await bcrypt.hash(newPassword, 10)
+            const updateResult = await this._userRepository.updatePasswordByEmail(email, hashPassword);
+            if (updateResult) {
+                return { success: true, message: 'Password reset successfully' };
+            } else {
+                return { success: false, message: 'User not found' };
+            }
+        } catch (error) {
+            console.error('Error in resetPassword service:', error);
+            return { success: false, message: 'Failed to reset password' };
+        }
+    }
+
 
 
     async getUser(token: string): Promise<IuserDocument | null> {
@@ -95,6 +138,30 @@ export class UserService implements IUserService {
         }
     }
 
+
+    async getsublist(userId:string){
+        try {
+            console.log("Reached @ service")
+            const getsubscribers = await this._userRepository.getAllsubscribers(userId)
+
+            return getsubscribers
+        } catch (error) {
+            
+        }
+    }
+    async getFollowinglist(userId:string){
+        try {
+            console.log("Reached @ service")
+            const getsubscribers = await this._userRepository.getAllfollowing(userId)
+
+            return getsubscribers
+        } catch (error) {
+            
+        }
+    }
+
+
+
     async searchUsers(nameQuery: string, loggedInUserName: string): Promise<IuserDocument[]> {
         try {
             console.log("@service", nameQuery, loggedInUserName);
@@ -107,6 +174,19 @@ export class UserService implements IUserService {
             return [];
         }
     }
+
+
+    async usercount() {
+        try {
+            const userCounts = await this._userRepository.userCount(); // Get counts from repository
+            return userCounts; // Return the counts object
+        } catch (error) {
+            console.error("Error in service layer:", error);
+            throw error;
+        }
+    }
+    
+
 
 
 
@@ -264,10 +344,13 @@ export class UserService implements IUserService {
 
 
 
-    async getAllUsers(page: number, limit: number): Promise<any> {
+    async getAllUsers(page: number, limit: number, search: string): Promise<any> {
         try {
 
-            const allUsers = await this._adminRepository.getAllUsers(page , limit);
+
+            console.log("@service",search)
+
+            const allUsers = await this._adminRepository.getAllUsers(page, limit, search);
             return allUsers;
 
 
@@ -286,7 +369,7 @@ export class UserService implements IUserService {
             throw new Error('Error counting users from the service');
         }
     }
-    
+
 
 
 
@@ -297,7 +380,7 @@ export class UserService implements IUserService {
     //             this._adminRepository.getAllUsers(limit, offset),
     //             this._adminRepository.getUsersCount()
     //         ]);
-    
+
     //         return {
     //             users,
     //             total,
@@ -309,7 +392,7 @@ export class UserService implements IUserService {
     //         throw new Error('Error fetching users from the service');
     //     }
     // }
-    
+
 
 
 

@@ -22,5 +22,19 @@ message GetCommentsRequest {
 }
 
 message GetCommentsResponse {
-  repeated string comments = 1;
+  string status = 1;
+  repeated Comment comments = 2; // Include both id and content for each comment
+}
+
+
+message Comment {
+  string id = 1;
+  string content = 2;
+  repeated Reply replies = 3; // Add replies
+}
+
+message Reply {
+  string userId = 1;
+  string content = 2;
+  string createdAt = 3; // Include createdAt timestamp
 }

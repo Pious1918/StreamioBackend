@@ -23,7 +23,7 @@ export interface IUserService {
     // getAllUsers(): Promise<IuserDocument[]>;
 
 
-    getAllUsers(page: number, limit: number): Promise<{
+    getAllUsers(page: number, limit: number, search:string): Promise<{
         users: IuserDocument[];
         total: number;
         currentPage: number;

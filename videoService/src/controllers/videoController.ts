@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getPresignedUrl,  } from "../utils/s3uploader";
+import { getPresignedUrl, } from "../utils/s3uploader";
 import { IAuthRequest } from "../middleware/authmiddle";
 import { videoService } from "../services/videoService";
 import ffmpeg from 'fluent-ffmpeg';
@@ -10,12 +10,27 @@ import amqp from 'amqplib';
 
 // import crypto from 'crypto'
 import fs from 'fs';
-import path from 'path';
+import path, { resolve } from 'path';
 import Ffmpeg from 'fluent-ffmpeg';
+import { client, client2 } from "../client";
+import likedModel from "../models/likedVModel";
 
 // const randomVideoName = (bytes=32)=>crypto.randomBytes(bytes).toString('hex')
 const RABBITMQ_URL = 'amqp://localhost'; // RabbitMQ URL, 
 
+interface CommentResponse {
+    comments: Array<string>; // Replace `any` with the specific type of comment
+}
+
+interface UserResponse {
+    name: string,
+    email: string
+}
+
+interface GetCommentsError {
+    code: number;
+    details: string;
+}
 
 
 export class VideoController implements IVideoController {
@@ -125,28 +140,168 @@ export class VideoController implements IVideoController {
         }
     }
 
-
-
     public getVideo = async (req: IAuthRequest, res: Response) => {
         try {
             const { videoId } = req.params;
+
+            const userId: any = req.user?.userId
+
+            // Fetch video data
             const videoData = await this._videoService.findVideo(videoId);
             if (!videoData || !videoData.videolink) {
                 res.status(404).send("Video not found");
                 return;
             }
 
-            const videolink = videoData.videolink;
-            if (videolink) {
-                res.status(200).json(videoData)
+            const uploaderId = videoData.uploaderId;
+
+            // Helper function to promisify gRPC calls
+            const fetchComments = (videoId: string): Promise<any[]> => {
+                return new Promise((resolve, reject) => {
+                    client.getComments({ videoId }, (error: GetCommentsError | null, response: CommentResponse | null) => {
+                        if (error) {
+                            return reject(error);
+                        }
+                        const comments = (response?.comments || []).map((comment: any) => ({
+                            id: comment.id,
+                            content: comment.content,
+                            replies: (comment.replies || []).map((reply: any) => ({
+                                userId: reply.userId,
+                                content: reply.content,
+                                createdAt: reply.createdAt,
+                            })),
+                        }));
+                        resolve(comments);
+                    });
+                });
+            };
+
+            const fetchUploaderData = (uploaderId: string): Promise<any> => {
+                return new Promise((resolve, reject) => {
+                    client2.GetChannelDetails({ _id: uploaderId }, (error: any, response: UserResponse) => {
+                        if (error) {
+                            return reject(error);
+                        }
+                        resolve({
+                            name: response.name,
+                            email: response.email,
+                        });
+                    });
+                });
+            };
+
+
+            const fetchviewerDetails = (viewerId: string): Promise<any> => {
+                return new Promise((resolve, reject) => {
+                    client2.GetViewerDetails({ _id: viewerId }, (error: any, response: any) => {
+                        if (error) {
+                            return reject(error);
+                        }
+                        resolve({
+                            name: response.name,
+                            email: response.email,
+                            following: response.following
+                        });
+                        console.log("response of viewer datat", response)
+                    })
+                })
+            }
+
+            // Fetch both comments and uploader data concurrently
+            const [comments, uploaderData] = await Promise.all([
+                fetchComments(videoId),
+                fetchUploaderData(uploaderId),
+                // fetchviewerDetails(userId)
+            ]);
+
+            let subscribed: string | boolean = false;
+
+            if (userId === uploaderId) {
+                subscribed = "same";
+            } else {
+                const viewerData = await fetchviewerDetails(userId);
+                if (viewerData.following.includes(uploaderId)) {
+                    subscribed = true;
+                }
             }
 
 
+            const likedStatus = await likedModel.findOne({ userId, videoId })
+
+            const isLiked = await this._videoService.getLikedStatus(userId, videoId);
+
+
+
+
+
+            // Combine data into a single response
+            const responseData = {
+                ...videoData,
+                comments,
+                uploader: uploaderData,
+                subscribed,
+                isLiked
+            };
+
+            res.status(200).json(responseData);
+        } catch (error) {
+            console.error("Error in getVideo:", error);
+            res.status(500).send("Internal server error");
+        }
+    };
+
+
+
+    public topfive = async (req: Request, res: Response) => {
+        try {
+            const top = await this._videoService.topViewed()
+            res.status(200).json({ top })
         } catch (error) {
             console.error(error);
             res.status(500).send("Internal server error");
         }
     }
+
+
+
+
+    public fetchOthers = async (req: IAuthRequest, res: Response) => {
+
+
+        try {
+            const { videoId } = req.params;
+            const videoDatas = await this._videoService.findOtherVideos(videoId);
+            res.status(200).json({ message: 'fetched succesully', video: videoDatas })
+        } catch (error) {
+            console.error(error);
+            res.status(500).send("Internal server error");
+        }
+    }
+
+
+    public postcomment = async (req: IAuthRequest, res: Response) => {
+        try {
+            const { videoId, content } = req.body
+            const userId = req.user?.userId
+
+            client.postComment({ userId, videoId, content }, (error: any, response: any) => {
+                if (error) {
+                    console.error('error posting comment:', error)
+                    res.status(500).json("failed to post comment")
+                }
+
+                const newComment = JSON.parse(response.comment)
+                client.forEach((client: any) => {
+                    client.send(JSON.stringify({ videoId, newComment }))
+                })
+
+                res.status(200).json(response)
+            })
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
 
 
 
@@ -178,7 +333,85 @@ export class VideoController implements IVideoController {
     }
 
 
+    public videoViews = async (req: Request, res: Response) => {
+        try {
+            const { videoId } = req.body
+            console.log("video id for increment views", videoId)
+            const videodata = this._videoService.incrementViews(videoId)
 
+            res.status(200).json({ message: 'views updated' })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ error: "didnt update" });
+        }
+    }
+
+    public savewatchlater = async (req: IAuthRequest, res: Response) => {
+        try {
+            const { videoId } = req.body;
+            const userId = req.user?.userId;
+    
+            console.log("video id for savewatchlater", videoId);
+    
+            const watchlaterData = {
+                userid: userId,
+                videoid: videoId,
+            };
+    
+            const result = await this._videoService.savewatchlater(watchlaterData);
+    
+            if (result.isAlreadySaved) {
+                 res.status(200).json({ message: 'Video is already saved to Watch Later' });
+                 return
+            }
+    
+            res.status(200).json({ message: 'Video saved to Watch Later' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Failed to update Watch Later" });
+        }
+    };
+    
+
+
+
+
+    public likeVideo = async (req: IAuthRequest, res: Response) => {
+        try {
+            const userId = req.user?.userId
+            console.log("user id @likevideo", userId)
+            const { videoId } = req.body
+            console.log("videoId", videoId)
+            const likedata = {
+                userid: userId,
+                videoid: videoId
+            }
+            const updateLike = this._videoService.likevideo(likedata)
+            res.status(200).json({ message: 'video liked successfully' })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ error: 'error from likevideo' })
+        }
+    }
+
+
+    public unlikeVideo = async (req: IAuthRequest, res: Response) => {
+        try {
+            const userId = req.user?.userId;
+            console.log("user id @unlikeVideo", userId);
+
+            const { videoId } = req.body;
+            console.log("videoId", videoId);
+
+            // Call the service to handle the unlike logic
+            await this._videoService.unlikeVideo({ userId, videoId });
+
+            res.status(200).json({ message: 'Video unliked successfully' });
+        } catch (error) {
+            console.error("Error in unlikeVideo:", error);
+            res.status(500).json({ error: 'Error while unliking the video' });
+        }
+    }
 
 
     // -----------------------------------------------------------------------------------------------------------------------------------
@@ -266,62 +499,64 @@ export class VideoController implements IVideoController {
 
     // }
 
-// **convertToHLS() end here
+    // **convertToHLS() end here
 
 
 
-// **-------------------------------------------------------------------------
-public convertToHLS = async(req:IAuthRequest , res:Response):Promise<void>=>{
-    const userId =req.user?.userId
+    // **-------------------------------------------------------------------------
+    public convertToHLS = async (req: IAuthRequest, res: Response): Promise<void> => {
+        const userId = req.user?.userId
 
-    if(!userId){
-        res.status(403).json({error:'userid is missing in the token'})
-        return 
+        if (!userId) {
+            res.status(403).json({ error: 'userid is missing in the token' })
+            return
+        }
+
+        const { title, description, visibility, payment, price, videoUrl , thumbnailUrl, category } = req.body;
+        const fileName = path.basename(videoUrl, path.extname(videoUrl));
+
+        try {
+            // Connect to RabbitMQ and create a channel
+            const connection = await amqp.connect(RABBITMQ_URL);
+            const channel = await connection.createChannel();
+            const queue = 'video_conversion_queue';
+
+            // Ensure the queue exists
+            await channel.assertQueue(queue, { durable: true });
+
+            // Prepare message data for video conversion
+            const message = {
+                userId,
+                title,
+                description,
+                visibility,
+                payment,
+                price,
+                videoUrl,
+                fileName,
+                thumbnailUrl,
+                category
+            };
+
+            // Send message to the queue
+            channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)), {
+                persistent: true,
+            });
+
+            console.log('Video conversion task sent to RabbitMQ');
+            res.status(200).json({ message: 'Video conversion task sent successfully' });
+
+            // Close the channel and connection
+            setTimeout(() => {
+                channel.close();
+                connection.close();
+            }, 500);
+        } catch (error) {
+            console.error('Error sending task to RabbitMQ:', error);
+            res.status(500).send('Error processing video conversion');
+        }
+
     }
-
-    const { title, description, visibility, payment, price, fileUrl } = req.body;
-    const fileName = path.basename(fileUrl, path.extname(fileUrl));
-
-    try {
-        // Connect to RabbitMQ and create a channel
-        const connection = await amqp.connect(RABBITMQ_URL);
-        const channel = await connection.createChannel();
-        const queue = 'video_conversion_queue';
-
-        // Ensure the queue exists
-        await channel.assertQueue(queue, { durable: true });
-
-        // Prepare message data for video conversion
-        const message = {
-            userId,
-            title,
-            description,
-            visibility,
-            payment,
-            price,
-            fileUrl,
-            fileName,
-        };
-
-        // Send message to the queue
-        channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)), {
-            persistent: true,
-        });
-
-        console.log('Video conversion task sent to RabbitMQ');
-        res.status(200).json({ message: 'Video conversion task sent successfully' });
-
-        // Close the channel and connection
-        setTimeout(() => {
-            channel.close();
-            connection.close();
-        }, 500);
-    } catch (error) {
-        console.error('Error sending task to RabbitMQ:', error);
-        res.status(500).send('Error processing video conversion');
-    }
-
-}
 
 
 
@@ -381,6 +616,34 @@ public convertToHLS = async(req:IAuthRequest , res:Response):Promise<void>=>{
 
     public getUseruploadedvideo = async (req: IAuthRequest, res: Response): Promise<void> => {
         const userId = req.user?.userId;
+        console.log("Reached here", userId);
+    
+        if (!userId) {
+            res.status(400).json({ error: "User ID is required" });
+            return;
+        }
+    
+        try {
+            console.log("Reached again");
+            const videos = await this._videoService.getVideoUploadedbyUser(userId);
+    
+            // Check if no videos are found
+            if (videos.length === 0) {
+                res.status(200).json({ message: "No videos uploaded by this user." });
+            } else {
+                res.status(200).json(videos);
+            }
+        } catch (error) {
+            console.error("Error fetching videos:", error);
+            res.status(500).json({ error: "An error occurred while fetching videos" });
+        }
+    };
+    
+
+
+
+    public likedVideos = async (req: IAuthRequest, res: Response): Promise<void> => {
+        const userId = req.user?.userId;
         console.log("REsacahed herererere", userId)
         if (!userId) {
             res.status(400).json({ error: "User ID is required" });
@@ -389,13 +652,77 @@ public convertToHLS = async(req:IAuthRequest , res:Response):Promise<void>=>{
 
         try {
             console.log("reached again")
-            const videos = await this._videoService.getVideoUploadedbyUser(userId);
-            res.status(200).json(videos);
+            const videos = await this._videoService.getlikedvideos(userId);
+            res.status(200).json({ videos, message: 'fetched successfully' });
         } catch (error) {
             console.error("Error fetching videos:", error);
             res.status(500).json({ error: "An error occurred while fetching videos" });
         }
     };
+
+    public getwatchlatervideos = async (req: IAuthRequest, res: Response): Promise<void> => {
+        const userId = req.user?.userId;
+        console.log("REsacahed herererere", userId)
+        if (!userId) {
+            res.status(400).json({ error: "User ID is required" });
+            return;
+        }
+
+        try {
+            console.log("reached again")
+            const videos = await this._videoService.getwatchlaterVideos(userId);
+            res.status(200).json({ videos, message: 'fetched successfully' });
+        } catch (error) {
+            console.error("Error fetching videos:", error);
+            res.status(500).json({ error: "An error occurred while fetching videos" });
+        }
+    };
+
+    public getPrivatevideos = async (req: IAuthRequest, res: Response): Promise<void> => {
+        const userId = req.user?.userId;
+        console.log("REsacahed herererere", userId)
+        if (!userId) {
+            res.status(400).json({ error: "User ID is required" });
+            return;
+        }
+
+        try {
+            console.log("reached again")
+            const videos = await this._videoService.getprivatevideos(userId);
+
+            if (!videos) {
+                res.status(200).json({  message: 'there is no private video' });
+
+            }
+            else {
+                res.status(200).json({ videos, message: 'fetched successfully' });
+
+            }
+        } catch (error) {
+            console.error("Error fetching videos:", error);
+            res.status(500).json({ error: "An error occurred while fetching videos" });
+        }
+    };
+
+
+    public updatevideodata = async (req: Request, res: Response): Promise<void> => {
+        const videoId = req.params.id;
+        const updatedFields = req.body;
+
+        try {
+            console.log("vid $ data", videoId, updatedFields)
+
+            const updatedVideo = await this._videoService.updateVideoData(videoId, updatedFields);
+
+            if (!updatedVideo) {
+                res.status(404).json({ message: 'Video not found' });
+            }
+
+            res.status(200).json({ message: 'Video updated successfully', video: updatedVideo });
+        } catch (error) {
+
+        }
+    }
 
 
 }

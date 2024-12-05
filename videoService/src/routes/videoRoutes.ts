@@ -1,8 +1,11 @@
+import { Request, Response } from "express";
+
 import { Router } from "express";
 import { VideoController } from "../controllers/videoController";
 import { AuthMiddleware } from "../middleware/authmiddle";
 import express from "express"
 import path from "path";
+import VideoModel from "../models/videoModel";
 
 // import express from "express";
 
@@ -13,10 +16,17 @@ const videoController = new VideoController()
 
 
 router.get('/videos', videoController.getVideos)
-router.get('/video/:videoId' ,videoController.getVideo)
+router.get('/likedvideos', authMiddleware.authorize, videoController.likedVideos)
+router.get('/getprivatevideos', authMiddleware.authorize, videoController.getPrivatevideos)
+router.get('/getwatchlatervideos', authMiddleware.authorize, videoController.getwatchlatervideos)
+router.get('/video/:videoId' , authMiddleware.authorize ,videoController.getVideo)
+router.get('/fetchOther/:videoId' ,videoController.fetchOthers)
 router.get('/video/:videoId/hls',videoController.getHlsVideo)
-
+router.get('/topfive',videoController.topfive)
 router.get('/getuseruploadedvideo',authMiddleware.authorize,videoController.getUseruploadedvideo)
+
+
+router.put('/update-video/:id',  videoController.updatevideodata)
 
 router.get('/hls', express.static(path.resolve(__dirname, '../../hls')), (req, res, next) => {
     console.log('Serving:', req.path);
@@ -24,8 +34,13 @@ router.get('/hls', express.static(path.resolve(__dirname, '../../hls')), (req, r
   });
 router.post('/generate-video-presigned-url',  videoController.genPresignedurl)
 router.post('/save-video-data',authMiddleware.authorize,  videoController.videoDataSave)
+router.put('/updateviews',authMiddleware.authorize,  videoController.videoViews)
+router.post('/savewatchlater',authMiddleware.authorize,  videoController.savewatchlater)
 
 router.post('/convert', authMiddleware.authorize , videoController.convertToHLS)
+router.post('/comments', authMiddleware.authorize , videoController.postcomment)
+router.post('/likevideo', authMiddleware.authorize , videoController.likeVideo)
+router.post('/unlike', authMiddleware.authorize , videoController.unlikeVideo)
 
 
 

@@ -11,6 +11,7 @@ const commentController = new CommentController()
 
 router.post('/comments', authMiddleware.authorize, commentController.postComment)
 router.get('/comments/:videoId',commentController.getComments);
+router.post('/reply',authMiddleware.authorize, commentController.replyComment)
 
 
 

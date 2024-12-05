@@ -4,27 +4,6 @@ import { PaidStatus } from "../enums/paidStatus.enum";
 import { IvideoDocument } from "../interfaces/IvideoDocument.interface";
 
 
-// export enum Visibility {
-//     PUBLIC = "public",
-//     PRIVATE = "private",
-// }
-
-// export enum PaidStatus {
-//     PAID = "paid",
-//     UNPAID = "unpaid",
-// }
-// export interface IvideoDocument extends Document{
-//     _id:string,
-//     uploaderId:string,
-//     title:string,
-//     description:string,
-//     likes:number,
-//     views:number,
-//     videolink:string,
-//     visibility: Visibility; // Updated to use the enum
-//     price:number,
-//     paid: PaidStatus; // Updated to use the enum
-// }
 
 // Create the video schema
 const videoSchema: Schema = new Schema({
@@ -34,6 +13,8 @@ const videoSchema: Schema = new Schema({
     likes: { type: Number, default: 0 },
     views: { type: Number, default: 0 },
     videolink: { type: String, required: true },
+    thumbnail: { type: String, required: true },
+    category: { type: String, required: true },
     visibility: { 
         type: String, 
         default: Visibility.PUBLIC, // Set default to public

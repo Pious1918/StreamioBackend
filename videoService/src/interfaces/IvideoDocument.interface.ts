@@ -10,7 +10,10 @@ export interface IvideoDocument extends Document{
     likes:number,
     views:number,
     videolink:string,
+    category:string,
+    thumbnail?:string,
     visibility: Visibility; // Updated to use the enum
     price:number,
     paid: PaidStatus; // Updated to use the enum
+    createdAt?:Date
 }

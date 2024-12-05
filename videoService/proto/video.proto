@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+
+
+service VideoService {
+  // RPC method to fetch videos by uploaderId
+  rpc GetVideosByUploader (UploaderRequest) returns (VideoListResponse);
+}
+
+message UploaderRequest {
+  string uploaderId = 1;
+}
+
+message Video {
+
+  string uploaderId = 1;
+  string title = 2;
+  string description = 3;
+  int32 likes = 4;
+  int32 views = 5;
+  string videolink = 6;
+  string visibility = 7;
+  double price = 8;
+  string paid = 9;
+  string createdAt = 10;
+  string _id= 11;
+}
+
+message VideoListResponse {
+  repeated Video videos = 1;
+}

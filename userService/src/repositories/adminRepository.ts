@@ -1,10 +1,17 @@
 import { IAdminRepository } from "../interfaces/admin.repo.interface";
 import adminModel, { IadminDocument } from "../models/adminModel";
+import bannerModel from "../models/bannerModel";
 import userModel, { IuserDocument } from "../models/userModel";
 import { BaseRepository } from "./baseRepo";
 import { userRepository } from "./userRepository";
+import mongoose from 'mongoose';
 
-
+interface BannerData {
+    title: string;
+    description: string;
+    image: string;
+  }
+  
 
 
 
@@ -28,6 +35,24 @@ export class adminRepostiory extends BaseRepository<IadminDocument> implements I
     }
 
 
+    async saveBanner(bannerdata:BannerData){
+       return await bannerModel.create(bannerdata)
+    }
+
+
+    async getbanner(){
+        return await bannerModel.find()
+    }
+
+
+    async deleteBanner(id:string){
+        console.log("reached @ repo")
+        const objectId = new mongoose.Types.ObjectId(id);
+
+        return await bannerModel.findOneAndDelete({_id: objectId})
+    }
+
+
     // async getAllUsers(limit: number, offset: number): Promise<any> {
     //     try {
     //         return this.userRepository.getAllUsers()
@@ -38,10 +63,13 @@ export class adminRepostiory extends BaseRepository<IadminDocument> implements I
     //     }
     // }
 
-    async getAllUsers(page: number, limit: number): Promise<IuserDocument[]> {
+    async getAllUsers(page: number, limit: number, search: string): Promise<IuserDocument[]> {
         try {
+
+            console.log("@repo",search)
+
             const offset = (page - 1) * limit;
-            const allUsers = await this.userRepository.getAllUsers(limit, offset);
+            const allUsers = await this.userRepository.getAllUsers(limit, offset , search);
             return allUsers;
         } catch (error) {
             console.error("Error in getAllUsers service:", error);

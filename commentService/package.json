@@ -4,8 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node ./src/server.ts",
-    "dev": "nodemon",
-    "generate:proto": "proto-loader-gen-types --grpcLib=@grpc/grpc-js --outDir=src/proto-generated/ proto/comment.proto"
+    "dev": "nodemon"
 
   },
   "keywords": [],

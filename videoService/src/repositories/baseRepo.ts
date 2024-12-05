@@ -30,4 +30,13 @@ export class BaseRepository<T extends Document>{
         const data = await this._model.findById(id)
         return data
     }
+
+    async findByIdAndUpdate(
+        id: string,
+        update: Partial<T>,
+        options?: Record<string, unknown> // Optional options parameter
+    ): Promise<T | null> {
+        return this._model.findByIdAndUpdate(id, update, options);
+    }
+    
 }
