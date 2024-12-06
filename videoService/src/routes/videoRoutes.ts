@@ -34,6 +34,7 @@ router.get('/hls', express.static(path.resolve(__dirname, '../../hls')), (req, r
   });
 router.post('/generate-video-presigned-url',  videoController.genPresignedurl)
 router.post('/save-video-data',authMiddleware.authorize,  videoController.videoDataSave)
+router.post('/reportvideo',authMiddleware.authorize,  videoController.saveReportVideoData)
 router.put('/updateviews',authMiddleware.authorize,  videoController.videoViews)
 router.post('/savewatchlater',authMiddleware.authorize,  videoController.savewatchlater)
 

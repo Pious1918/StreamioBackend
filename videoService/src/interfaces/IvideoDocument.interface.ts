@@ -9,6 +9,7 @@ export interface IvideoDocument extends Document{
     description:string,
     likes:number,
     views:number,
+    report:number,
     videolink:string,
     category:string,
     thumbnail?:string,

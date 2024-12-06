@@ -21,6 +21,7 @@ export class CommentController {
         try {
             const { comment, videoId } = req.body;
             const userId = req.user?.userId
+            const userName =req.user?.name
             console.log("coommetn", comment)
             console.log("coommetn", videoId)
             console.log("userid", userId)
@@ -28,7 +29,11 @@ export class CommentController {
                 res.status(400).json({ error: "User ID is required" });
                 return;
             }
-            const commntdata = await this._commentService.postComment(userId, videoId, comment)
+            if (!userName) {
+                res.status(400).json({ error: "User name is required" });
+                return;
+            }
+            const commntdata = await this._commentService.postComment(userId, videoId, userName ,comment)
             console.log("commentdata", commntdata)
             res.status(200).json({
                 status: 'success',
@@ -59,6 +64,7 @@ export class CommentController {
         try {
 
             const userId = req.user?.userId
+            const userName = req.user?.name
             console.log(req.body)
             const commentId = req.body.cId
             const reply = req.body.reply
@@ -66,9 +72,13 @@ export class CommentController {
                 res.status(400).send("User is not authenticated");
                 return
             }
+            if (!userName) {
+                res.status(400).send("User name not authenticated");
+                return
+            }
 
             console.log("userId commentId reply", userId, commentId, reply)
-            const replyData = await this._commentService.addReply(userId, commentId, reply)
+            const replyData = await this._commentService.addReply(userId, userName, commentId, reply)
             res.status(200).json({
                 message: "Reply added successfully",
                 reply: replyData // Assuming `replyData` is returned from the service

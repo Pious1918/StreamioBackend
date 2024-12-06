@@ -24,6 +24,10 @@ export class videoService implements IVideoService {
   async getVideos() {
     return await this._videoRepository.getvideo()
   }
+  
+  async getVideosByCategory(category:string) {
+    return await this._videoRepository.getCategoryvideo(category)
+  }
 
 
   async incrementViews(videoId: string) {
@@ -109,6 +113,26 @@ export class videoService implements IVideoService {
 
 
     return await this._videoRepository.uploadVideo(completeVideoData)
+  }
+
+
+
+  async saveReportdata(reportVdata: any) {
+
+
+    try {
+
+      const reportdata ={
+        videoId: reportVdata.videoId,
+        reason: reportVdata.reason,
+      }
+
+      console.log("report data @ videoService",reportdata)
+
+      return await this._videoRepository.saveReportdata(reportdata)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   async likevideo(likedata: any) {

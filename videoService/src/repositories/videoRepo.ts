@@ -3,6 +3,7 @@ import { Visibility } from "../enums/visibility.enum";
 import { IvideoDocument } from "../interfaces/IvideoDocument.interface";
 import { IVideoRepository } from "../interfaces/Ivideorepo.interface";
 import likedModel from "../models/likedVModel";
+import reportModel from "../models/reportModel";
 import VideoModel from "../models/videoModel";
 import watchlaterModel from "../models/watchlaterModel";
 import { BaseRepository } from "./baseRepo";
@@ -28,6 +29,11 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
     return publicVideos;
   }
 
+
+  async getCategoryvideo(category: string): Promise<IvideoDocument[]>{
+    return VideoModel.find({ category }); // Query videos where category matches
+
+  }
 
 
   async findbyId(videoId: string): Promise<IvideoDocument> {
@@ -67,13 +73,13 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
   async likeVideo(likedata: any) {
     try {
       console.log('reached@vrepo');
-  
+
       // Create a new instance of the model with the provided data
       const saveLikeVideo = new likedModel(likedata);
-  
+
       // Save the data to the database
       const result = await saveLikeVideo.save();
-  
+
       // Return the saved document
       return result;
     } catch (error) {
@@ -83,56 +89,82 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
   }
 
 
+  async saveReportdata(reportdata: any) {
+    try {
+      console.log('reached@vrepo');
+
+      // Create a new instance of the model with the provided data
+      const savereportVideo = new reportModel(reportdata);
+
+      // Save the data to the database
+      const result = await savereportVideo.save();
+
+      // After saving the report, increment the 'report' field in the corresponding video document
+      const videoId = reportdata.videoId; // Assume reportdata contains the video ID
+      await VideoModel.updateOne(
+        { _id: videoId }, // Find the video by its ID
+        { $inc: { report: 1 } } // Increment the 'report' field by 1
+      );
+
+      // Return the saved document
+      return result;
+    } catch (error) {
+      console.error('Error saving video:', error);
+      throw new Error('Failed to save report video data');
+    }
+  }
+
+
   async watchlaterVideo(watchlaterdata: any) {
     try {
-        console.log('reached @vrepo');
+      console.log('reached @vrepo');
 
-        // Check if the video is already in the Watch Later list for this user
-        const existingVideo = await watchlaterModel.findOne({
-            videoId: watchlaterdata.videoId,
-            userId: watchlaterdata.userId,
-        });
+      // Check if the video is already in the Watch Later list for this user
+      const existingVideo = await watchlaterModel.findOne({
+        videoId: watchlaterdata.videoId,
+        userId: watchlaterdata.userId,
+      });
 
-        if (existingVideo) {
-            console.log('Video already exists in Watch Later');
-            return { isAlreadySaved: true };
-        }
+      if (existingVideo) {
+        console.log('Video already exists in Watch Later');
+        return { isAlreadySaved: true };
+      }
 
-        // Create a new instance of the model with the provided data
-        const savewatchlaterVideo = new watchlaterModel(watchlaterdata);
+      // Create a new instance of the model with the provided data
+      const savewatchlaterVideo = new watchlaterModel(watchlaterdata);
 
-        // Save the data to the database
-        const result = await savewatchlaterVideo.save();
+      // Save the data to the database
+      const result = await savewatchlaterVideo.save();
 
-        // Return the saved document
-        return { isAlreadySaved: false, data: result };
+      // Return the saved document
+      return { isAlreadySaved: false, data: result };
     } catch (error) {
-        console.error('Error saving video:', error);
-        throw new Error('Failed to save video');
+      console.error('Error saving video:', error);
+      throw new Error('Failed to save video');
     }
-}
+  }
 
 
 
   async unlikeVideo(likedata: any) {
     try {
-        console.log('reached@unlikeRepo');
-        
-        // Use MongoDB's `deleteOne` method to remove the document
-        const result = await likedModel.deleteOne({
-            videoId: likedata.videoId,
-            userId: likedata.userId,
-        });
+      console.log('reached@unlikeRepo');
 
-        // Optionally, log the result to check the status
-        console.log("Delete result:", result);
+      // Use MongoDB's `deleteOne` method to remove the document
+      const result = await likedModel.deleteOne({
+        videoId: likedata.videoId,
+        userId: likedata.userId,
+      });
 
-        return result;
+      // Optionally, log the result to check the status
+      console.log("Delete result:", result);
+
+      return result;
     } catch (error) {
-        console.error("Error deleting video like:", error);
-        throw new Error('Failed to unlike the video');
+      console.error("Error deleting video like:", error);
+      throw new Error('Failed to unlike the video');
     }
-}
+  }
 
 
 
@@ -216,7 +248,7 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
       throw new Error('Failed to fetch videos');
     }
   }
-  
+
 
 
 }

@@ -164,13 +164,17 @@ export class VideoController implements IVideoController {
                         }
                         const comments = (response?.comments || []).map((comment: any) => ({
                             id: comment.id,
+                            username: comment.username,
                             content: comment.content,
                             replies: (comment.replies || []).map((reply: any) => ({
                                 userId: reply.userId,
+                                username: reply.username,
                                 content: reply.content,
                                 createdAt: reply.createdAt,
                             })),
                         }));
+
+                        console.log("all comments are", comments)
                         resolve(comments);
                     });
                 });
@@ -309,7 +313,21 @@ export class VideoController implements IVideoController {
     public getVideos = async (req: IAuthRequest, res: Response) => {
         try {
 
-            const videos = await this._videoService.getVideos()
+
+            const tab = req.query.tab as string; // Extract the tab value from the query parameters
+            console.log("Tab value received:", tab);
+            let videos;
+
+            if (tab && tab !== 'All') {
+                // Fetch videos based on the tab value
+                videos = await this._videoService.getVideosByCategory(tab);
+            } else {
+                // Fetch all videos if no specific tab or 'All' is selected
+                videos = await this._videoService.getVideos();
+            }
+
+
+            // const videos = await this._videoService.getVideos()
 
             console.log("videos @conter", videos)
             res.status(200).json(videos)
@@ -350,28 +368,28 @@ export class VideoController implements IVideoController {
         try {
             const { videoId } = req.body;
             const userId = req.user?.userId;
-    
+
             console.log("video id for savewatchlater", videoId);
-    
+
             const watchlaterData = {
                 userid: userId,
                 videoid: videoId,
             };
-    
+
             const result = await this._videoService.savewatchlater(watchlaterData);
-    
+
             if (result.isAlreadySaved) {
-                 res.status(200).json({ message: 'Video is already saved to Watch Later' });
-                 return
+                res.status(200).json({ message: 'Video is already saved to Watch Later' });
+                return
             }
-    
+
             res.status(200).json({ message: 'Video saved to Watch Later' });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: "Failed to update Watch Later" });
         }
     };
-    
+
 
 
 
@@ -512,7 +530,7 @@ export class VideoController implements IVideoController {
             return
         }
 
-        const { title, description, visibility, payment, price, videoUrl , thumbnailUrl, category } = req.body;
+        const { title, description, visibility, payment, price, videoUrl, thumbnailUrl, category } = req.body;
         const fileName = path.basename(videoUrl, path.extname(videoUrl));
 
         try {
@@ -612,21 +630,40 @@ export class VideoController implements IVideoController {
 
 
 
+    public saveReportVideoData = async (req: IAuthRequest, res: Response): Promise<void> => {
+
+        try {
+
+
+            const { reportVideodata } = req.body
+            console.log("report video data are ", reportVideodata)
+
+            const saveReportVideoData = await this._videoService.saveReportdata(reportVideodata)
+            res.status(200).json({ message: 'Video reported successfully', data: saveReportVideoData });
+
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Failed to save video' });
+        }
+    };
+
+
+
 
 
     public getUseruploadedvideo = async (req: IAuthRequest, res: Response): Promise<void> => {
         const userId = req.user?.userId;
         console.log("Reached here", userId);
-    
+
         if (!userId) {
             res.status(400).json({ error: "User ID is required" });
             return;
         }
-    
+
         try {
             console.log("Reached again");
             const videos = await this._videoService.getVideoUploadedbyUser(userId);
-    
+
             // Check if no videos are found
             if (videos.length === 0) {
                 res.status(200).json({ message: "No videos uploaded by this user." });
@@ -638,7 +675,7 @@ export class VideoController implements IVideoController {
             res.status(500).json({ error: "An error occurred while fetching videos" });
         }
     };
-    
+
 
 
 
@@ -691,7 +728,7 @@ export class VideoController implements IVideoController {
             const videos = await this._videoService.getprivatevideos(userId);
 
             if (!videos) {
-                res.status(200).json({  message: 'there is no private video' });
+                res.status(200).json({ message: 'there is no private video' });
 
             }
             else {

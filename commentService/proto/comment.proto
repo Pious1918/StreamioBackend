@@ -29,12 +29,14 @@ message GetCommentsResponse {
 
 message Comment {
   string id = 1;
-  string content = 2;
-  repeated Reply replies = 3; // Add replies
+  string username = 2;
+  string content = 3;
+  repeated Reply replies = 4; // Add replies
 }
 
 message Reply {
   string userId = 1;
-  string content = 2;
-  string createdAt = 3; // Include createdAt timestamp
+  string username = 2;
+  string content = 3;
+  string createdAt = 4; // Include createdAt timestamp
 }

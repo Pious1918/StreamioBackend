@@ -2,7 +2,8 @@ import commentModel, { ICommentDocument } from "../models/commentModel";
 import { BaseRepository } from "./baseRepo";
 
 export interface IReplyComment {
-    userId: string;        // The ID of the user who posted the reply
+    userId: string;  
+    username:string;      // The ID of the user who posted the reply
     comment: string;       // The text content of the reply
     createdAt: Date;       // The timestamp of when the reply was created
 }
@@ -18,7 +19,7 @@ export class CommentRepository extends BaseRepository<ICommentDocument> {
     async postComment(commentData: Partial<ICommentDocument>): Promise<ICommentDocument> {
         console.log("reached@COmment repo")
        
-        if (!commentData.userId || !commentData.videoId || !commentData.comment) {
+        if (!commentData.userId || !commentData.videoId || !commentData.username || !commentData.comment  ) {
             throw new Error('Missing required fields');
         }
         const savecomment = await this.save(commentData)
@@ -29,6 +30,8 @@ export class CommentRepository extends BaseRepository<ICommentDocument> {
 
         return savecomment
     }
+
+
     async updateReply(commentId: string, replyData: IReplyComment) {
         try {
             // Use `findByIdAndUpdate` to find the comment by its ID and add the reply

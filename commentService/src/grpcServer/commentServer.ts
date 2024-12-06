@@ -48,13 +48,29 @@ async function GetComments(call: any, callback: any) {
     // Map over the comments to include replies as well
     const commentData = comments.map((comment: any) => ({
         id: comment._id.toString(),
+        username:comment.username,
         content: comment.comment,
         replies: comment.replyComments.map((reply: any) => ({
           userId: reply.userId,
+          username:reply.username,
           content: reply.comment,
           createdAt: reply.createdAt,
         })),
       }));
+
+      commentData.forEach((comment) => {
+        console.log("Comment ID:", comment.id);
+        console.log("Content:", comment.content);
+        console.log("username:", comment.username);
+        console.log("Replies:");
+        comment.replies.forEach((reply:any) => {
+          console.log("  User ID:", reply.userId);
+          console.log("  Username:", reply.username);
+          console.log("  Content:", reply.content);
+          console.log("  Created At:", reply.createdAt);
+        });
+      });
+      
 
 console.log("commentdata @grpc server",commentData)
 // Correctly log replies for each comment
@@ -103,7 +119,7 @@ console.log("commentdata @grpc server",commentData)
 
 
 async function PostComment(call: any, callback: any) {
-    const { userId, videoId, content, replyToCommentId } = call.request; // replyToCommentId is optional for replies
+    const { userId, videoId, content, replyToCommentId , username  } = call.request; // replyToCommentId is optional for replies
   
     if (replyToCommentId) {
       // Handle the case where this is a reply to an existing comment
@@ -123,6 +139,7 @@ async function PostComment(call: any, callback: any) {
         // Create the reply
         const newReply = {
           userId,
+          username,
           comment: content,
           createdAt: new Date(),
         };

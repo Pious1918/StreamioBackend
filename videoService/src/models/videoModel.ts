@@ -12,6 +12,7 @@ const videoSchema: Schema = new Schema({
     description: { type: String, required: true },
     likes: { type: Number, default: 0 },
     views: { type: Number, default: 0 },
+    report: { type: Number, default: 0 },
     videolink: { type: String, required: true },
     thumbnail: { type: String, required: true },
     category: { type: String, required: true },

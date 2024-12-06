@@ -12,11 +12,11 @@ export class CommentService {
 
 
   ///Promise<Icomment>
-  public async postComment(userId: string, videoId: string, content: string): Promise<any> {
+  public async postComment(userId: string, videoId: string, userName:string, content: string): Promise<any> {
 
 
     console.log("@ sreevie")
-    const data = { userId, videoId, comment: content };
+    const data = { userId, videoId, username:userName , comment: content };
 
     console.log("dafdaf", data)
 
@@ -31,11 +31,12 @@ export class CommentService {
     // return CommentModel.find({ videoId }).sort({ timestamp: -1 }).exec();
   }
 
-  public async addReply(userId: string, commentId: string, reply: string) {
+  public async addReply(userId: string, username:string, commentId: string, reply: string) {
     console.log("@service", userId, commentId, reply);
 
     const replyData = {
       userId,
+      username:username,
       comment: reply,
       createdAt: new Date()
     };
