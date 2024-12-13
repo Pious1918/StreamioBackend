@@ -1,0 +1,35 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  
+  pull_request:
+    branches:
+      - main
+ 
+jobs: 
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and Push Services
+      run: |
+        docker buildx build --push --tag nspious/streamio-api-gateway:latest ./apiGateway
+        docker buildx build --push --tag nspious/streamio-user-service:latest ./userService
+        docker buildx build --push --tag nspious/streamio-video-service:latest ./videoService
+        docker buildx build --push --tag nspious/streamio-comment-service:latest ./commentService
+        docker buildx build --push --tag nspious/streamio-live-service:latest ./liveService
+     
