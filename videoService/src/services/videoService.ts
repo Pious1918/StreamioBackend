@@ -4,6 +4,7 @@ import { Visibility } from "../enums/visibility.enum";
 import { IvideoDocument } from "../interfaces/IvideoDocument.interface";
 import { IVideoService } from "../interfaces/IvideoService.interface";
 import likedModel from "../models/likedVModel";
+import reportModel from "../models/reportModel";
 import VideoModel from "../models/videoModel";
 import watchlaterModel from "../models/watchlaterModel";
 import { VideoRepository } from "../repositories/videoRepo";
@@ -97,6 +98,18 @@ export class videoService implements IVideoService {
     }
   }
 
+  async getAllreports(videoId: string) {
+    try {
+
+      console.log("@videoService")
+      const reportDatas = await this._videoRepository.findreportdatas(videoId)
+ 
+      return reportDatas
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   async saveVideo(videodata: Partial<IvideoDocument>, userId: string): Promise<IvideoDocument> {
 
     console.log("@service")
@@ -107,7 +120,7 @@ export class videoService implements IVideoService {
       views: 0,
       visibility: videodata.visibility || Visibility.PUBLIC,
       paid: videodata.paid || PaidStatus.UNPAID,
-      price: videodata.price || 0 // Ensure price is added and defaults to 0 if not provided
+      price: videodata.price || 0 
 
     }
 
@@ -117,12 +130,14 @@ export class videoService implements IVideoService {
 
 
 
-  async saveReportdata(reportVdata: any) {
+  async saveReportdata(reportVdata: any , reporterId:string) {
 
 
     try {
 
       const reportdata ={
+        reporterId:reporterId,
+        uploaderId:reportVdata.uploaderId,
         videoId: reportVdata.videoId,
         reason: reportVdata.reason,
       }
@@ -135,6 +150,39 @@ export class videoService implements IVideoService {
     }
   }
 
+
+  async verifyVedio(videoId: string) {
+    try {
+      console.log("report data @ videoService", videoId);
+  
+      const result = await this._videoRepository.saveVerifieddata(videoId);
+  
+      return { success: true, data: result }; // Success response
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: 'An error occurred during video verification' };
+    }
+  }
+
+
+  async sendnotice(noticedata: any) {
+    try {
+        console.log("notice data @ videoService", noticedata);
+
+        const result = await this._videoRepository.saveNoticedata(noticedata);
+
+        if (result.alreadyExists) {
+            return { success: false, message: 'Notice already sent for this video.' };
+        } else {
+            return { success: true, message: 'Notice sent successfully.' };
+        }
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: 'An error occurred while sending the notice.' };
+    }
+}
+
+  
   async likevideo(likedata: any) {
     console.log('videodata @services', likedata)
     try {
@@ -163,12 +211,10 @@ export class videoService implements IVideoService {
   async getVideoUploadedbyUser(uploaderId: string): Promise<IvideoDocument[]> {
     console.log('Reached @service');
 
-    // Fetch the videos
     const videoData = await this._videoRepository.findv({ uploaderId });
 
-    // Return an empty array if no videos are found
     if (!videoData || videoData.length === 0) {
-        return []; // Return an empty array instead of throwing an error
+        return []; 
     }
 
     return videoData;
@@ -233,6 +279,31 @@ export class videoService implements IVideoService {
 
   }
 
+  async getreportVideos(userId: string) {
+
+    console.log('reached @serrvice')
+
+    const reportedVideos = await this._videoRepository.getReportedVideosByUserId(userId);
+
+    return reportedVideos;
+
+
+  }
+
+
+
+  async getreportVideoAdmin() {
+
+    try {
+      return await this._videoRepository.getReportAboveTen()
+    } catch (error) {
+      
+    }
+
+
+
+  }
+
 
   async getLikedStatus(userId: string, videoId: string): Promise<boolean> {
     try {
@@ -253,21 +324,5 @@ export class videoService implements IVideoService {
 
 
 
-  // public async addCommentToVideo(videoId: string, userId: string, content: string): Promise<void> {
-  //   try {
-  //     const response = await this._commentClient.postComment(videoId, userId, content);
-  //     console.log('Comment added:', response);
-  //   } catch (error) {
-  //     console.error('Failed to add comment:', error);
-  //   }
-  // }
 
-  // public async displayComments(videoId: string): Promise<void> {
-  //   try {
-  //     const comments = await this._commentClient.getAllComments(videoId);
-  //     console.log('Comments for video:', comments);
-  //   } catch (error) {
-  //     console.error('Failed to fetch comments:', error);
-  //   }
-  // }
 }

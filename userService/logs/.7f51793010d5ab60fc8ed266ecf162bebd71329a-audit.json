@@ -6,26 +6,6 @@
     "auditLog": "logs\\.7f51793010d5ab60fc8ed266ecf162bebd71329a-audit.json",
     "files": [
         {
-            "date": 1732936366859,
-            "name": "logs\\app-2024-11-30.log",
-            "hash": "4d7206a8697105f889c55afe4409d95d202a752404539e860f7ef893547dab83"
-        },
-        {
-            "date": 1733111790066,
-            "name": "logs\\app-2024-12-02.log",
-            "hash": "d46f6c85c2520c09807b4b85b346a7091324c92d5ec67e8fe9fbf433fe4cbc1a"
-        },
-        {
-            "date": 1733195542130,
-            "name": "logs\\app-2024-12-03.log",
-            "hash": "5ef2edfe1eaac24e337427a4730a14fd59c43c27adc2ca2d515a5e101f8a911a"
-        },
-        {
-            "date": 1733280976972,
-            "name": "logs\\app-2024-12-04.log",
-            "hash": "2253dec7e6141392209e7308f9e4cfcda91d9a58a0d4671e95041b6cdeaffb7d"
-        },
-        {
             "date": 1733367893765,
             "name": "logs\\app-2024-12-05.log",
             "hash": "5e09e9ca66e3d11622475e8c8498dd591fe4a956ae50ebdb3c7a07d0efa53bb5"
@@ -34,6 +14,26 @@
             "date": 1733454621943,
             "name": "logs\\app-2024-12-06.log",
             "hash": "1b8c676e4134b4a70d5e17df911c8cff4c355234282a3c7545f8cc54068ffccb"
+        },
+        {
+            "date": 1733539746589,
+            "name": "logs\\app-2024-12-07.log",
+            "hash": "1fe0a306b069a262cdee8df8b7b83b97078b160ce83ee52391470ecd6a9fe453"
+        },
+        {
+            "date": 1733630299463,
+            "name": "logs\\app-2024-12-08.log",
+            "hash": "4d745017475d0bc714e212ffa635d7f7815aa3e79d2a12c15bade350a5786769"
+        },
+        {
+            "date": 1733886009901,
+            "name": "logs\\app-2024-12-11.log",
+            "hash": "41276c7ca9b35b9f33f29c0e7bd7d027430e32d833dd6f6380af7632f3c6d631"
+        },
+        {
+            "date": 1733972262251,
+            "name": "logs\\app-2024-12-12.log",
+            "hash": "24f84e3482b0b547391671ec67a1289e0ccb06ec5801d079591586cf2f28f501"
         }
     ],
     "hashType": "sha256"

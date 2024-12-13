@@ -14,6 +14,7 @@ import bcrypt from 'bcryptjs'
 import fs from 'fs'
 import path from 'path'
 import { client } from "../client";
+import redisClient from "../utils/redisClient";
 const templatePath = path.join(__dirname, '../utils/templates/emailtemplate.html')
 const templateContent = fs.readFileSync(templatePath, 'utf-8');
 
@@ -116,6 +117,8 @@ export class UserController implements IUserController {
         const { email, password } = req.body;
         console.log(email);
 
+        console.log("new hai from login")
+       
         try {
             const user = await this._userService.findByemail(email);
 
@@ -270,6 +273,13 @@ export class UserController implements IUserController {
         res.status(200).json({ message: 'user details', userProfile })
 
     }
+
+
+
+
+
+
+
 
     public getSubscriberlist = async (req: IAuthRequest, res: Response) => {
         try {

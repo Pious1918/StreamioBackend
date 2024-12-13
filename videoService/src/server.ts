@@ -31,8 +31,9 @@ io.on('connection', (socket) => {
 const port = process.env.SERVER_PORT
 const grpcServer = createGRPCServer()
 const PORT = '50052'
+
 grpcServer.bindAsync(`0.0.0.0:${PORT}`, grpc.ServerCredentials.createInsecure(), () => {
-    console.log(`Server running at http://0.0.0.0:${PORT}`);
+    console.log(`videoservice grpc server running at http://0.0.0.0:${PORT}`);
     grpcServer;
 });
 grpcServer

@@ -3,14 +3,17 @@ import * as protoLoader from '@grpc/proto-loader';
 import path from 'path';
 
 // // const PROTO_PATH = path.resolve(__dirname, '../../commentService/src/comment.proto');
-const PROTO_PATH = path.resolve(__dirname, '../../videoService/proto/video.proto');
+// const PROTO_PATH = path.resolve(__dirname, '../../videoService/proto/video.proto');
+const PROTO_PATH = path.resolve('/app/videoService/proto/video.proto');
+
+
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {});
 const videoPackage = grpc.loadPackageDefinition(packageDefinition)
 const videoProto:any = videoPackage.VideoService
 
 const client = new videoProto(
-    "localhost:50052",
+    "video-service:50052",
     grpc.credentials.createInsecure()
 )
 

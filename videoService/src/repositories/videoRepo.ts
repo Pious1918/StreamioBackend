@@ -3,6 +3,7 @@ import { Visibility } from "../enums/visibility.enum";
 import { IvideoDocument } from "../interfaces/IvideoDocument.interface";
 import { IVideoRepository } from "../interfaces/Ivideorepo.interface";
 import likedModel from "../models/likedVModel";
+import noticeModel from "../models/noticeModel";
 import reportModel from "../models/reportModel";
 import VideoModel from "../models/videoModel";
 import watchlaterModel from "../models/watchlaterModel";
@@ -23,15 +24,14 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
     if (!videos) {
       throw new Error("failed to retrive video")
     }
-    // Filter videos to only include those with public visibility
     const publicVideos = videos.filter(video => video.visibility === Visibility.PUBLIC);
 
     return publicVideos;
   }
 
 
-  async getCategoryvideo(category: string): Promise<IvideoDocument[]>{
-    return VideoModel.find({ category }); // Query videos where category matches
+  async getCategoryvideo(category: string): Promise<IvideoDocument[]> {
+    return VideoModel.find({ category }); 
 
   }
 
@@ -49,12 +49,101 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
   async findLikedStatus(userId: string, videoId: string): Promise<boolean> {
     try {
       const likedStatus = await likedModel.findOne({ userId, videoId });
-      return !!likedStatus; // Returns true if the video is liked, otherwise false
+      return !!likedStatus; 
     } catch (error) {
       console.error("Error in findLikedStatus:", error);
       throw error;
     }
   }
+
+
+  async getReportAboveTen() {
+    try {
+      // Fetch videos with report count > 10
+      const videosWithHighReports = await VideoModel.find({ report: { $gt: 10 } });
+
+      if (!videosWithHighReports.length) {
+        return { message: 'No videos have more than 10 reports' };
+      }
+
+      const videoIds = videosWithHighReports.map((video) => video._id);
+
+      const reportDetails = await reportModel.find({ videoId: { $in: videoIds } });
+
+      const noticeDetails = await noticeModel.find({ videoId: { $in: videoIds } });
+      const noticedVideoIds = new Set(noticeDetails.map((notice) => notice.videoId.toString()));
+
+      const populatedVideos = videosWithHighReports.map((video) => {
+        const reportsForVideo = reportDetails.filter(
+          (report) => report.videoId.toString() === video._id.toString()
+        );
+
+        const reportReasons = reportsForVideo.flatMap((report: any) =>
+          report.reasons.map((reason: any) => ({
+            reason: reason.reason,
+            reporterId: report.reporterId,
+            reportedAt: report.reportedAt,
+          }))
+        );
+
+        const noticeSent = noticedVideoIds.has(video._id.toString());
+
+        return {
+          videoDetails: video.toObject(),
+          reportReasons,
+          noticeSent,
+        };
+      });
+
+      console.log('Populated Videos with Reports:', populatedVideos);
+
+      return populatedVideos;
+    } catch (error) {
+      console.error('Error in getReportAboveTen:', error);
+      throw error;
+    }
+  }
+
+
+
+  async getReportedVideosByUserId(userId: string) {
+    try {
+      console.log('reached @repository');
+
+      const reportedVideos = await reportModel.find({ uploaderId: userId });
+
+      const videoIds = reportedVideos.map((report: any) => report.videoId);
+
+      const videoDetails = await VideoModel.find({ _id: { $in: videoIds } });
+
+      const noticeDetails = await noticeModel.find({ videoId: { $in: videoIds } });
+
+      const noticedVideoIds = new Set(noticeDetails.map((notice) => notice.videoId.toString()));
+
+      const populatedVideos = reportedVideos.map((report: any) => {
+        const videoDetail = videoDetails.find((video: any) => video._id.toString() === report.videoId.toString());
+
+        const noticeSent = noticedVideoIds.has(report.videoId.toString());
+
+        return {
+          ...report.toObject(),
+          videoDetails: videoDetail || null,
+          noticeSent,
+        };
+      });
+
+      console.log("Populated Videos:", populatedVideos);
+
+      return populatedVideos;
+    } catch (error) {
+      console.error("Error in getReportedVideosByUserId:", error);
+      throw new Error('Failed to get reported videos');
+    }
+  }
+
+
+
+
 
 
   async uploadVideo(videoData: Partial<IvideoDocument>): Promise<IvideoDocument> {
@@ -74,13 +163,10 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
     try {
       console.log('reached@vrepo');
 
-      // Create a new instance of the model with the provided data
       const saveLikeVideo = new likedModel(likedata);
 
-      // Save the data to the database
       const result = await saveLikeVideo.save();
 
-      // Return the saved document
       return result;
     } catch (error) {
       console.error('Error saving video:', error);
@@ -88,26 +174,68 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
     }
   }
 
-
-  async saveReportdata(reportdata: any) {
+  async saveNoticedata(noticedata: any) {
     try {
       console.log('reached@vrepo');
 
-      // Create a new instance of the model with the provided data
-      const savereportVideo = new reportModel(reportdata);
+      const existingNotice = await noticeModel.findOne({ videoId: noticedata.videoId });
 
-      // Save the data to the database
-      const result = await savereportVideo.save();
+      if (existingNotice) {
+        console.log(`Notice already exists for videoId: ${noticedata.videoId}`);
+        return { alreadyExists: true };
+      }
 
-      // After saving the report, increment the 'report' field in the corresponding video document
-      const videoId = reportdata.videoId; // Assume reportdata contains the video ID
-      await VideoModel.updateOne(
-        { _id: videoId }, // Find the video by its ID
-        { $inc: { report: 1 } } // Increment the 'report' field by 1
+      const data = {
+        videoId: noticedata.videoId,
+        notice: noticedata.noticemessage,
+      };
+
+      const savenoticedata = new noticeModel(data);
+
+      const result = await savenoticedata.save();
+      console.log(`Notice saved successfully for videoId: ${noticedata.videoId}`);
+      return { alreadyExists: false, result };
+    } catch (error) {
+      console.error('Error saving notice:', error);
+      throw new Error('Failed to save notice');
+    }
+  }
+
+
+
+  async saveVerifieddata(videoId: string) {
+    try {
+      console.log('reached@vrepo', videoId);
+
+      const deleteResult = await reportModel.deleteOne({ videoId });
+      if (deleteResult.deletedCount === 0) {
+        console.log(`No report found with videoId: ${videoId}`);
+        return { message: `No report found with videoId: ${videoId}` };
+      } else {
+        console.log(`Report with videoId: ${videoId} deleted successfully.`);
+      }
+
+
+      const deleteNoticeResult = await noticeModel.deleteOne({ videoId });
+      if (deleteNoticeResult.deletedCount === 0) {
+        console.log(`No notice found with videoId: ${videoId}`);
+      } else {
+        console.log(`Notice with videoId: ${videoId} deleted successfully.`);
+      }
+
+      const updateResult = await VideoModel.updateOne(
+        { _id: videoId },
+        { $set: { report: 0 } }
       );
 
-      // Return the saved document
-      return result;
+      if (updateResult.matchedCount === 0) {
+        console.warn(`No video found with videoId: ${videoId}`);
+        return { message: `No video found with videoId: ${videoId}` };
+      } else {
+        console.log(`Video with videoId: ${videoId} updated successfully.`);
+      }
+
+      return { message: 'Video verified successfully' };
     } catch (error) {
       console.error('Error saving video:', error);
       throw new Error('Failed to save report video data');
@@ -115,11 +243,94 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
   }
 
 
+
+
+  async saveReportdata(reportdata: any) {
+    try {
+      console.log('Reached @ VideoRepository');
+
+      const existingReport = await reportModel.findOne({ videoId: reportdata.videoId });
+
+      if (existingReport) {
+
+        const alreadyReported = await reportModel.findOne({
+          videoId: reportdata.videoId,
+          reasons: { $elemMatch: { reporterId: reportdata.reporterId } },
+        });
+
+        if (alreadyReported) {
+          console.log('User has already reported this video.');
+          return { message: 'You already reported this video' }; 
+        }
+
+
+        const updatedReport = await reportModel.updateOne(
+          { videoId: reportdata.videoId },
+          {
+            $push: {
+              reasons: {
+                reporterId: reportdata.reporterId,
+                reason: reportdata.reason,
+              },
+            },
+          }
+        );
+        console.log('Report updated:', updatedReport);
+
+        await VideoModel.updateOne(
+          { _id: reportdata.videoId },
+          { $inc: { report: 1 } }
+        );
+
+        return updatedReport;
+      } else {
+        const newReport = new reportModel({
+          videoId: reportdata.videoId,
+          uploaderId: reportdata.uploaderId,
+          reasons: [
+            {
+              reporterId: reportdata.reporterId,
+              reason: reportdata.reason,
+            },
+          ],
+        });
+
+        const result = await newReport.save();
+        console.log('New report created:', result);
+
+        await VideoModel.updateOne(
+          { _id: reportdata.videoId },
+          { $inc: { report: 1 } }
+        );
+
+        return result;
+      }
+    } catch (error) {
+      console.error('Error saving video report:', error);
+      throw new Error('Failed to save video report data');
+    }
+  }
+
+
+  async findreportdatas(videoId: string) {
+    try {
+
+      const reportdata = await reportModel.find({ videoId })
+      return reportdata
+    } catch (error) {
+      console.error('Error saving video report:', error);
+      throw new Error('Failed to save video report data');
+    }
+  }
+
+
+
+
+
   async watchlaterVideo(watchlaterdata: any) {
     try {
       console.log('reached @vrepo');
 
-      // Check if the video is already in the Watch Later list for this user
       const existingVideo = await watchlaterModel.findOne({
         videoId: watchlaterdata.videoId,
         userId: watchlaterdata.userId,
@@ -130,13 +341,10 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
         return { isAlreadySaved: true };
       }
 
-      // Create a new instance of the model with the provided data
       const savewatchlaterVideo = new watchlaterModel(watchlaterdata);
 
-      // Save the data to the database
       const result = await savewatchlaterVideo.save();
 
-      // Return the saved document
       return { isAlreadySaved: false, data: result };
     } catch (error) {
       console.error('Error saving video:', error);
@@ -150,13 +358,11 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
     try {
       console.log('reached@unlikeRepo');
 
-      // Use MongoDB's `deleteOne` method to remove the document
       const result = await likedModel.deleteOne({
         videoId: likedata.videoId,
         userId: likedata.userId,
       });
 
-      // Optionally, log the result to check the status
       console.log("Delete result:", result);
 
       return result;
@@ -209,10 +415,8 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
 
   async updateVideo(videoId: string, updatedFields: Partial<any>) {
     try {
-      // Use Mongoose's findByIdAndUpdate method to update the video
       const video = await VideoModel.findByIdAndUpdate(videoId, updatedFields, { new: true });
 
-      // Return the updated video or null if not found
       return video;
     } catch (error) {
       console.error('Error updating video:', error);
@@ -223,7 +427,6 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
 
   async findOthervideosByid(videoId: string): Promise<IvideoDocument[]> {
     try {
-      // Use $ne (not equal) to find all videos except the one with the given videoId
       const videoDatas = await VideoModel.find({
         _id: { $ne: videoId }
       });
@@ -241,7 +444,7 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
 
   async findv(filter: Record<string, any>): Promise<IvideoDocument[]> {
     try {
-      const videos = await VideoModel.find(filter).exec(); // `VideoModel` is the Mongoose model for your videos
+      const videos = await VideoModel.find(filter).exec(); 
       return videos;
     } catch (error) {
       console.error('Error fetching videos:', error);

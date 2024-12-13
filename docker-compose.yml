@@ -1,60 +1,104 @@
+
 version: '3.8'
 
 services:
 
 
+  rabbitmq:
+    image: rabbitmq
+    container_name: rabbitmq_streamio
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - streamio-network
+
   api-gateway:
     restart: on-failure
-    build: 
+    build:
       context: ./apiGateway
-      dockerfile: Dockerfile
-    container_name: streamio-apiGateway
-    ports: 
+    image: api-gateway:latest
+    ports:
       - "5000:5000"
-    volumes:
-    - ./apiGateway:/app 
-    depends_on: 
+    depends_on:
+      - live-service
+      - comment-service
       - user-service
+      - video-service
+    env_file:
+      - ./apiGateway/.env
+    volumes:
+      - ./apiGateway:/app
     networks:
-      - streamio_network     
+      - streamio-network
 
+  comment-service:
+    build:
+      context: ./commentService
+    image: comment-service:latest
+    ports:
+      - "5003:5003"
+      - "50051:50051"
+    env_file:
+      - ./commentService/.env
+    volumes:
+      - ./commentService:/app
+    networks:
+      - streamio-network
 
-
+  live-service:
+    build:
+      context: ./liveService
+    image: live-service:latest
+    ports:
+      - "5005:5005"
+    env_file:
+      - ./liveService/.env
+    volumes:
+      - ./liveService:/app
+    networks:
+      - streamio-network
 
 
   user-service:
-    restart: on-failure
-    build: 
+    build:
       context: ./userService
-      dockerfile: Dockerfile
-    container_name: streamio-user-service
-    ports: 
-      - "5001:5001" 
-    environment:
-      - MONGO_URL=mongodb://mongodb:27017/userService
-    volumes:
-    - ./userService:/app  
-    depends_on:
-      - mongodb
-    networks:
-      - streamio_network
-
-
-  mongodb:
-    image: mongo
-    container_name: streamio-mongodb
+    image: user-service:latest
     ports:
-      - "27017:27017"
-    environment:
-      - MONGO_URL=mongodb+srv://nspious1999:n9f6ez6hGkMw1qMu@streamio-user-service.uuj2g.mongodb.net/  
-    networks:
-      - streamio_network
+      - "5001:5001"
+      - "50054:50054"
+    env_file:
+      - ./userService/.env
     volumes:
-      - mongodb-data:/data/db
+      - ./userService:/app
+      - ./videoService:/app/videoService
+      
+    networks:
+      - streamio-network
 
-volumes:
-  mongodb-data:
+
+
+  video-service:
+    build:
+      context: ./videoService
+    image: video-service:latest
+    ports:
+      - "5002:5002"
+      - "50052:50052"
+    depends_on:
+      - rabbitmq  
+    env_file:
+      - ./videoService/.env
+    volumes:
+      - ./videoService:/app
+      - ./videoService/proto:/app/proto
+      - ./commentService:/app/commentService
+      - ./userService:/app/userService
+
+      
+    networks:
+      - streamio-network
 
 networks:
-  streamio_network:
+  streamio-network:
     driver: bridge

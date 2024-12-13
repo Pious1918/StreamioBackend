@@ -14,9 +14,10 @@ import path, { resolve } from 'path';
 import Ffmpeg from 'fluent-ffmpeg';
 import { client, client2 } from "../client";
 import likedModel from "../models/likedVModel";
+import redisClient from "../utils/redisClient";
 
 // const randomVideoName = (bytes=32)=>crypto.randomBytes(bytes).toString('hex')
-const RABBITMQ_URL = 'amqp://localhost'; // RabbitMQ URL, 
+const RABBITMQ_URL = 'amqp://rabbitmq'; // RabbitMQ URL, 
 
 interface CommentResponse {
     comments: Array<string>; // Replace `any` with the specific type of comment
@@ -204,7 +205,7 @@ export class VideoController implements IVideoController {
                         resolve({
                             name: response.name,
                             email: response.email,
-                            following: response.following
+                            following: response.following || []
                         });
                         console.log("response of viewer datat", response)
                     })
@@ -224,8 +225,10 @@ export class VideoController implements IVideoController {
                 subscribed = "same";
             } else {
                 const viewerData = await fetchviewerDetails(userId);
-                if (viewerData.following.includes(uploaderId)) {
+                if (Array.isArray(viewerData.following) && viewerData.following.includes(uploaderId)) {
                     subscribed = true;
+                } else {
+                    subscribed = false; // Default to not subscribed
                 }
             }
 
@@ -276,6 +279,22 @@ export class VideoController implements IVideoController {
             const { videoId } = req.params;
             const videoDatas = await this._videoService.findOtherVideos(videoId);
             res.status(200).json({ message: 'fetched succesully', video: videoDatas })
+        } catch (error) {
+            console.error(error);
+            res.status(500).send("Internal server error");
+        }
+    }
+
+
+    public getReportReason = async (req: IAuthRequest, res: Response) => {
+
+
+        try {
+            const { videoId } = req.params;
+            console.log("video id @ getreportreason on controller", videoId)
+            const reportreason = await this._videoService.getAllreports(videoId)
+            // const videoDatas = await this._videoService.findOtherVideos(videoId);
+            res.status(200).json({ message: 'Report reasons fetched succesully', reportreason })
         } catch (error) {
             console.error(error);
             res.status(500).send("Internal server error");
@@ -337,6 +356,14 @@ export class VideoController implements IVideoController {
             res.status(500).json({ message: "Error fetching videos" })
         }
     }
+
+
+
+
+
+
+
+
 
 
     public genPresignedurl = async (req: Request, res: Response) => {
@@ -431,93 +458,6 @@ export class VideoController implements IVideoController {
         }
     }
 
-
-    // -----------------------------------------------------------------------------------------------------------------------------------
-    // **function to upload video to s3 bucket and then convert to HLS format and saving it
-
-    // public convertToHLS = async (req: IAuthRequest, res: Response): Promise<void> => {
-
-    //     const userId = req.user?.userId;
-
-    //     // Check if userId is present
-    //     if (!userId) {
-    //         res.status(403).json({ error: 'User ID is missing in token' });
-    //         return;
-    //     }
-
-    //     const { title, description, visibility, payment, price, fileUrl } = req.body;
-    //     console.log(title, description, visibility, payment, price, fileUrl)
-
-    //     // Define paths for HLS output in the public folder
-    //     const fileName = path.basename(fileUrl, path.extname(fileUrl));
-    //     const hlsOutputPath = path.join(__dirname, '../../public', `${fileName}-hls`);
-
-
-    //     // Ensure the output directory exists
-    //     if (!fs.existsSync(hlsOutputPath)) {
-    //         fs.mkdirSync(hlsOutputPath, { recursive: true });
-    //     }
-
-    //     const playlistPath = path.join(hlsOutputPath, 'playlist.m3u8');
-    //     const hlsSegmentPath = path.join(hlsOutputPath, 'segment_%03d.ts');
-
-    //     Ffmpeg(fileUrl)
-    //         .output(playlistPath)
-    //         .outputOptions([
-    //             '-preset fast',
-    //             '-g 48',
-    //             '-sc_threshold 0',
-    //             '-map 0',
-    //             '-c:a aac',
-    //             '-ar 48000',
-    //             '-b:a 128k',
-    //             '-c:v h264',
-    //             '-profile:v main',
-    //             '-crf 20',
-    //             '-b:v 1000k',
-    //             '-maxrate 1000k',
-    //             '-bufsize 2000k',
-    //             '-hls_time 10',
-    //             '-hls_playlist_type vod',
-    //             '-hls_segment_filename', hlsSegmentPath,
-    //         ])
-    //         .on('end', async () => {
-    //             console.log('Conversion complete. Uploading to S3...');
-
-    //             try {
-    //                 const playlistKey = await uploadDirectoryToS3(hlsOutputPath, `${fileName}/`); // Use fileName as prefix
-
-    //                 // Optionally delete temporary files after upload
-    //                 fs.rmSync(hlsOutputPath, { recursive: true });
-    //                 console.log("playlistkeh@controller", playlistKey)
-
-    //                 const savedVideo = await this._videoService.saveVideo(
-    //                     { title, description, visibility, paid: payment, price, videolink: playlistKey as string },
-    //                     userId
-    //                 );
-
-    //                 res.status(200).json({ message: 'Video saved successfully', data: savedVideo });
-
-
-
-
-    //                 // res.status(200).json({ message: `HLS files uploaded to S3 under prefix: ${playlistKey}/` });
-    //             } catch (error) {
-    //                 console.error('Error uploading to S3:', error);
-    //                 res.status(500).send('Error uploading HLS files to S3');
-    //             }
-    //         })
-    //         .on('error', err => {
-    //             console.error('FFmpeg error:', err);
-    //             res.status(500).send('Error processing video');
-    //         })
-    //         .run();
-
-
-
-    // }
-
-    // **convertToHLS() end here
 
 
 
@@ -634,11 +574,25 @@ export class VideoController implements IVideoController {
 
         try {
 
+            const reporterId = req.user?.userId
+
+            if (!reporterId) {
+                res.status(403).json({ error: 'User ID is missing in token' });
+                return;
+            }
+
 
             const { reportVideodata } = req.body
             console.log("report video data are ", reportVideodata)
 
-            const saveReportVideoData = await this._videoService.saveReportdata(reportVideodata)
+            const saveReportVideoData: any = await this._videoService.saveReportdata(reportVideodata, reporterId)
+
+            // Check if the service returned a specific message
+            if (saveReportVideoData.message === 'You already reported this video') {
+                res.status(200).json({ message: saveReportVideoData.message }); // Send the specific message as a response
+                return;
+            }
+
             res.status(200).json({ message: 'Video reported successfully', data: saveReportVideoData });
 
         } catch (error) {
@@ -646,6 +600,68 @@ export class VideoController implements IVideoController {
             res.status(500).json({ error: 'Failed to save video' });
         }
     };
+
+    public verifybyadmin = async (req: IAuthRequest, res: Response): Promise<void> => {
+        try {
+            const { videoId } = req.body;
+
+            console.log("verify video id @ controller", videoId);
+
+            const verifyResult = await this._videoService.verifyVedio(videoId);
+
+            if (verifyResult.success) {
+                res.status(200).json({ message: 'Video verified successfully', data: verifyResult.data });
+            } else {
+                res.status(404).json({ message: verifyResult.message });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Failed to verify video' });
+        }
+    };
+
+
+    public verifybyuser = async (req: IAuthRequest, res: Response): Promise<void> => {
+        try {
+            const { videoId } = req.body;
+
+            console.log("verify video id @ controller", videoId);
+
+            const verifyResult = await this._videoService.verifyVedio(videoId);
+
+            if (verifyResult.success) {
+                res.status(200).json({ message: 'Video verified successfully', data: verifyResult.data });
+            } else {
+                res.status(404).json({ message: verifyResult.message });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Failed to verify video' });
+        }
+    };
+
+
+    public noticebyadmin = async (req: IAuthRequest, res: Response): Promise<void> => {
+        try {
+            const { noticedata } = req.body;
+    
+            console.log("noticedata @ controller", noticedata);
+    
+            const result = await this._videoService.sendnotice(noticedata);
+    
+
+            if (result.success) {
+                res.status(200).json({ message: result.message });
+            } else {
+                res.status(200).json({ message: result.message });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Failed to send notice' });
+        }
+    };
+    
+
 
 
 
@@ -709,6 +725,39 @@ export class VideoController implements IVideoController {
             console.log("reached again")
             const videos = await this._videoService.getwatchlaterVideos(userId);
             res.status(200).json({ videos, message: 'fetched successfully' });
+        } catch (error) {
+            console.error("Error fetching videos:", error);
+            res.status(500).json({ error: "An error occurred while fetching videos" });
+        }
+    };
+
+    public getReportedvideos = async (req: IAuthRequest, res: Response): Promise<void> => {
+        const userId = req.user?.userId;
+        console.log("REsacahed herererere", userId)
+        if (!userId) {
+            res.status(400).json({ error: "User ID is required" });
+            return;
+        }
+
+        try {
+            console.log("reached again")
+            const videos = await this._videoService.getreportVideos(userId);
+            res.status(200).json({ videos, message: 'reported fetched successfully' });
+        } catch (error) {
+            console.error("Error fetching videos:", error);
+            res.status(500).json({ error: "An error occurred while fetching videos" });
+        }
+    };
+
+
+    public getReportedVAdmin = async (req: IAuthRequest, res: Response): Promise<void> => {
+        console.log("REsacahed herererere")
+
+
+        try {
+            console.log("reached again")
+            const videos = await this._videoService.getreportVideoAdmin();
+            res.status(200).json({ videos, message: 'reported fetched successfully' });
         } catch (error) {
             console.error("Error fetching videos:", error);
             res.status(500).json({ error: "An error occurred while fetching videos" });

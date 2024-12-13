@@ -10,7 +10,7 @@ import { videoService } from '../services/videoService';
 
 
 
-const RABBITMQ_URL = 'amqp://localhost';
+const RABBITMQ_URL = 'amqp://rabbitmq';
 const videoservice = new videoService()
 
 export async function startWorker(){
@@ -36,6 +36,7 @@ export async function startWorker(){
 
             const playlistPath = path.join(hlsOutputPath, 'playlist.m3u8');
             const hlsSegmentPath = path.join(hlsOutputPath, 'segment_%03d.ts');
+            Ffmpeg.setFfmpegPath('/usr/bin/ffmpeg');  // or use '/usr/local/bin/ffmpeg' based on the FFmpeg location
 
             Ffmpeg(videoUrl)
                 .output(playlistPath)

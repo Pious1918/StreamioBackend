@@ -12,3 +12,8 @@ export interface IreportVDocument extends Document {
     reason: string,
     reportedAt?: Date
 }
+export interface InoticeDocument extends Document {
+    _id: string,
+    videoId: string,
+    notice:string
+}

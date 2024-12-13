@@ -7,7 +7,7 @@ const port = process.env.SERVER_PORT
 const grpcServer = createGRPCServer()
 const PORT = '50051';
 grpcServer.bindAsync(`0.0.0.0:${PORT}`, grpc.ServerCredentials.createInsecure(), () => {
-  console.log(`Server running at http://0.0.0.0:${PORT}`);
+  console.log(`Commentservice GRPC Server running at http://0.0.0.0:${PORT}`);
   grpcServer;
 });
 grpcServer
