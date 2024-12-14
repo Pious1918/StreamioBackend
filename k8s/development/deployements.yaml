@@ -23,6 +23,14 @@ spec:
         envFrom:
           - secretRef:
               name: api-gateway-secrets
+        volumeMounts:
+        - name: api-gateway-code
+          mountPath: /app/apiGateway
+      volumes:
+      - name: api-gateway-code
+        hostPath:
+          path: /run/desktop/mnt/host/f/BroCamp/NewFrontend/StreamioBackend/apiGateway
+          type: Directory
 
 ---
 apiVersion: v1
@@ -65,6 +73,14 @@ spec:
         envFrom:
           - secretRef:
               name: user-service-secrets
+        volumeMounts:
+        - name: user-service-code
+          mountPath: /app/userService
+      volumes:
+      - name: user-service-code
+        hostPath:
+          path: /run/desktop/mnt/host/f/BroCamp/NewFrontend/StreamioBackend/userService
+          type: Directory
 
 ---
 apiVersion: v1
@@ -106,7 +122,14 @@ spec:
         envFrom:
           - secretRef:
               name: comment-service-secrets
-
+        volumeMounts:
+        - name: comment-service-code
+          mountPath: /app/commentService
+      volumes:
+      - name: comment-service-code
+        hostPath:
+          path: /run/desktop/mnt/host/f/BroCamp/NewFrontend/StreamioBackend/commentService
+          type: Directory
 ---
 apiVersion: v1
 kind: Service
@@ -148,7 +171,14 @@ spec:
         envFrom:
           - secretRef:
               name: live-service-secrets
-
+        volumeMounts:
+        - name: live-service-code
+          mountPath: /app/liveService
+      volumes:
+      - name: live-service-code
+        hostPath:
+          path: /run/desktop/mnt/host/f/BroCamp/NewFrontend/StreamioBackend/liveService
+          type: Directory
 ---
 apiVersion: v1
 kind: Service
@@ -190,7 +220,14 @@ spec:
         envFrom:
           - secretRef:
               name: video-service-secrets
-
+        volumeMounts:
+        - name: video-service-code
+          mountPath: /app/videoService
+      volumes:
+      - name: video-service-code
+        hostPath:
+          path: /run/desktop/mnt/host/f/BroCamp/NewFrontend/StreamioBackend/videoService
+          type: Directory
 ---
 apiVersion: v1
 kind: Service

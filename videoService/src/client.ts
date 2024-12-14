@@ -3,14 +3,14 @@ import * as protoLoader from '@grpc/proto-loader';
 import path from 'path';
 
 // // const PROTO_PATH = path.resolve(__dirname, '../../commentService/src/comment.proto');
-const PROTO_PATH = path.resolve(__dirname, '../../commentService/proto/comment.proto');
-// const PROTO_PATH = path.resolve('/app/commentService/proto/comment.proto');
-
+// const PROTO_PATH = path.resolve(__dirname, '../../commentService/proto/comment.proto');
+const PROTO_PATH = path.resolve('/app/commentService/proto/comment.proto');
+ 
 console.log("comment proto path@ videoservic",PROTO_PATH)
 
 
-const USER_PROTO_PATH = path.resolve(__dirname, '../../userService/proto/user.proto');
-// const USER_PROTO_PATH = path.resolve('/app/userService/proto/user.proto');
+// const USER_PROTO_PATH = path.resolve(__dirname, '../../userService/proto/user.proto');
+const USER_PROTO_PATH = path.resolve('/app/userService/proto/user.proto');
 
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {});
