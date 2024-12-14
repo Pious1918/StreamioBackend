@@ -3,8 +3,8 @@ import * as protoLoader from '@grpc/proto-loader';
 import path from 'path';
 
 // // const PROTO_PATH = path.resolve(__dirname, '../../commentService/src/comment.proto');
-// const PROTO_PATH = path.resolve(__dirname, '../../videoService/proto/video.proto');
-const PROTO_PATH = path.resolve('/app/videoService/proto/video.proto');
+const PROTO_PATH = path.resolve(__dirname, '../../videoService/proto/video.proto');
+// const PROTO_PATH = path.resolve('/app/videoService/proto/video.proto');
 
 
 

@@ -23,14 +23,7 @@ spec:
         envFrom:
           - secretRef:
               name: api-gateway-secrets
-        volumeMounts:
-        - name: api-gateway-code
-          mountPath: /app
-      volumes:
-      - name: api-gateway-code
-        hostPath:
-          path: /mnt/data/StreamioBackend/apiGateway
-          type: Directory
+
 ---
 apiVersion: v1
 kind: Service
@@ -72,14 +65,7 @@ spec:
         envFrom:
           - secretRef:
               name: user-service-secrets
-        volumeMounts:
-        - name: user-service-code
-          mountPath: /app
-      volumes:
-      - name: user-service-code
-        hostPath:
-          path: /mnt/data/StreamioBackend/userService
-          type: Directory
+
 ---
 apiVersion: v1
 kind: Service
@@ -120,14 +106,7 @@ spec:
         envFrom:
           - secretRef:
               name: comment-service-secrets
-        volumeMounts:
-        - name: comment-service-code
-          mountPath: /app
-      volumes:
-      - name: comment-service-code
-        hostPath:
-          path: /mnt/data/StreamioBackend/commentService
-          type: Directory
+
 ---
 apiVersion: v1
 kind: Service
@@ -169,14 +148,7 @@ spec:
         envFrom:
           - secretRef:
               name: live-service-secrets
-        volumeMounts:
-        - name: live-service-code
-          mountPath: /app
-      volumes:
-      - name: live-service-code
-        hostPath:
-          path: /mnt/data/StreamioBackend/liveService
-          type: Directory
+
 ---
 apiVersion: v1
 kind: Service
@@ -218,14 +190,7 @@ spec:
         envFrom:
           - secretRef:
               name: video-service-secrets
-        volumeMounts:
-        - name: video-service-code
-          mountPath: /app
-      volumes:
-      - name: video-service-code
-        hostPath:
-          path: /mnt/data/StreamioBackend/videoService
-          type: Directory
+
 ---
 apiVersion: v1
 kind: Service
