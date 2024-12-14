@@ -23,6 +23,10 @@ COPY package*.json ./
 # Install nodemon globally (optional, but often helps for development)
 RUN npm install -g nodemon
 
+
+# Install ts-node globally (optional but helpful for dev)
+RUN npm install -g ts-node
+
 # Expose the port your app runs on
 EXPOSE 5002
 
