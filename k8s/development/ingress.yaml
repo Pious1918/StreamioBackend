@@ -2,46 +2,18 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: streamio-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+  namespace: streamio
 spec:
+  ingressClassName: nginx
   rules:
-  - host: streamio.local
+  - host: localhost
     http:
       paths:
-      - path: /api-gateway
+      - path: /
         pathType: Prefix
         backend:
           service:
-            name: api-gateway-service
+            name: api-gateway
             port:
               number: 5000
-      - path: /comment-service
-        pathType: Prefix
-        backend:
-          service:
-            name: comment-service
-            port:
-              number: 5003
-      - path: /live-service
-        pathType: Prefix
-        backend:
-          service:
-            name: live-service
-            port:
-              number: 5005
-      - path: /user-service
-        pathType: Prefix
-        backend:
-          service:
-            name: user-service
-            port:
-              number: 5001
-      - path: /video-service
-        pathType: Prefix
-        backend:
-          service:
-            name: video-service
-            port:
-              number: 5002
-
+      

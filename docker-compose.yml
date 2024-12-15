@@ -75,6 +75,8 @@ services:
       
     networks:
       - streamio-network
+    depends_on:
+      - video-service  # Ensure video-service starts before user-service
 
 
 

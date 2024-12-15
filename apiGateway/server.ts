@@ -33,8 +33,7 @@ app.use('/comment-service', proxy('http://comment-service:5003'))
 app.use('/live-service', proxy('http://live-service:5005'))
 
 
-const port = process.env.SERVER_PORT || 5000
-
+const port = process.env.SERVER_PORT || 5000 
 
 
 app.listen (port , ()=>{
