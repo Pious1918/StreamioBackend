@@ -25,7 +25,7 @@ spec:
               name: api-gateway-secrets
         volumeMounts:
         - name: api-gateway-code
-          mountPath: /app/apiGateway
+          mountPath: /app
       volumes:
       - name: api-gateway-code
         hostPath:
@@ -75,7 +75,7 @@ spec:
               name: user-service-secrets
         volumeMounts:
         - name: user-service-code
-          mountPath: /app/userService
+          mountPath: /app
       volumes:
       - name: user-service-code
         hostPath:
@@ -124,7 +124,7 @@ spec:
               name: comment-service-secrets
         volumeMounts:
         - name: comment-service-code
-          mountPath: /app/commentService
+          mountPath: /app
       volumes:
       - name: comment-service-code
         hostPath:
@@ -173,12 +173,12 @@ spec:
               name: live-service-secrets
         volumeMounts:
         - name: live-service-code
-          mountPath: /app/liveService
+          mountPath: /app
       volumes:
       - name: live-service-code
         hostPath:
           path: /run/desktop/mnt/host/f/BroCamp/NewFrontend/StreamioBackend/liveService
-          type: Directory
+
 ---
 apiVersion: v1
 kind: Service
@@ -222,7 +222,7 @@ spec:
               name: video-service-secrets
         volumeMounts:
         - name: video-service-code
-          mountPath: /app/videoService
+          mountPath: /app
       volumes:
       - name: video-service-code
         hostPath:

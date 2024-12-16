@@ -11,6 +11,7 @@ grpcServer.bindAsync(`0.0.0.0:${PORT}`, grpc.ServerCredentials.createInsecure(),
   grpcServer;
 });
 grpcServer
+console.log("haiii")
 
 app.listen(port , ()=>{
     console.log(`commentService server running on ${port}`)

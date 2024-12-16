@@ -4,9 +4,8 @@ FROM node:20.12.2
 # Set the working directory inside the container
 WORKDIR /app
 
-
-# Copy the rest of your application code
-COPY . .
+# Copy package.json and package-lock.json
+COPY package*.json ./ 
 
 # Install Node.js dependencies
 RUN npm install
@@ -15,8 +14,7 @@ RUN npm install
 # Install FFmpeg from Alpine package manager (apk)
 RUN apt-get update && apt-get install -y ffmpeg
 
-# Copy package.json and package-lock.json
-COPY package*.json ./ 
+
 
 
 
@@ -26,6 +24,16 @@ RUN npm install -g nodemon
 
 # Install ts-node globally (optional but helpful for dev)
 RUN npm install -g ts-node
+
+
+
+
+# Copy the rest of your application code
+COPY . .
+
+
+
+
 
 # Expose the port your app runs on
 EXPOSE 5002
