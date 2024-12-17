@@ -30,7 +30,7 @@ RUN npm install -g ts-node
 
 # Copy the rest of your application code
 COPY . .
-COPY ../commentService/proto/comment.proto ./proto/comment.proto
+
 
 
 

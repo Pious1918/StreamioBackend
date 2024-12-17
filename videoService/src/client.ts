@@ -4,7 +4,8 @@ import path from 'path';
 
 // // const PROTO_PATH = path.resolve(__dirname, '../../commentService/src/comment.proto');
 // const PROTO_PATH = path.resolve(__dirname, '../../commentService/proto/comment.proto');
-const PROTO_PATH = path.resolve('/app/commentService/proto/comment.proto');
+// const PROTO_PATH = path.resolve('/app/commentService/proto/comment.proto');
+const PROTO_PATH = path.resolve('./proto/comment.proto');
  
 console.log("comment proto path@ videoservic",PROTO_PATH)
 
