@@ -11,7 +11,8 @@ console.log("comment proto path@ videoservic",PROTO_PATH)
 
 
 // const USER_PROTO_PATH = path.resolve(__dirname, '../../userService/proto/user.proto');
-const USER_PROTO_PATH = path.resolve('/app/userService/proto/user.proto');
+// const USER_PROTO_PATH = path.resolve('/app/userService/proto/user.proto');
+const USER_PROTO_PATH = path.resolve(__dirname, '../proto/user.proto');
 
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {});
