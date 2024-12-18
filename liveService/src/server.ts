@@ -7,7 +7,7 @@ import http from 'http';
 const server = http.createServer(app)
 const io = new Server(server, {
   cors: { origin: '*' },
-  path: '/live-service/socket.io',
+  path: '/socket.io',
 })
 
 
