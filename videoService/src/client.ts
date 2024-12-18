@@ -23,10 +23,16 @@ const userPackageDefinition = protoLoader.loadSync(USER_PROTO_PATH , {})
 const userPackage = grpc.loadPackageDefinition(userPackageDefinition)
 const userProto: any = userPackage.UserService
 
+console.log("from client.ts @video")
 const client = new commentProto(
     "comment-service:50051",
     grpc.credentials.createInsecure()
 )
+console.log("from client.ts @video")
+console.log("with client.ts @video")
+
+
+
 
 const client2 = new userProto(
     "user-service:50054",

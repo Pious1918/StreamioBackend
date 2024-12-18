@@ -10,7 +10,7 @@ import { videoService } from '../services/videoService';
 
 
 
-const RABBITMQ_URL = 'amqp://rabbitmq';
+const RABBITMQ_URL = 'amqp://rabbitmq.streamio.svc.cluster.local';
 const videoservice = new videoService()
 
 export async function startWorker(){

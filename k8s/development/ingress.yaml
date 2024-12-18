@@ -16,4 +16,10 @@ spec:
             name: api-gateway
             port:
               number: 5000
-      
+      - path: /live-service
+        pathType: Prefix
+        backend:
+          service:
+            name: live-service
+            port:
+              number: 5005
