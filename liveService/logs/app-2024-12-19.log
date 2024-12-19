@@ -2,3 +2,7 @@
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/live-service/getalllives\",\"status\":\"404\",\"responseTime\":\"6.487\"}","timestamp":"2024-12-19T03:01:47.441Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/live-service/getalllives\",\"status\":\"404\",\"responseTime\":\"1.764\"}","timestamp":"2024-12-19T03:01:53.552Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/generate-presigned-url\",\"status\":\"200\",\"responseTime\":\"190.225\"}","timestamp":"2024-12-19T03:25:14.937Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/generate-presigned-url\",\"status\":\"200\",\"responseTime\":\"131.568\"}","timestamp":"2024-12-19T03:50:27.795Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getalllives\",\"status\":\"200\",\"responseTime\":\"504.793\"}","timestamp":"2024-12-19T03:51:21.977Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/saveStreamdata\",\"status\":\"200\",\"responseTime\":\"468.723\"}","timestamp":"2024-12-19T03:51:30.986Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getalllives\",\"status\":\"200\",\"responseTime\":\"221.774\"}","timestamp":"2024-12-19T03:51:34.523Z"}

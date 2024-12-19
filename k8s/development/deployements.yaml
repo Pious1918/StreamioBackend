@@ -196,12 +196,12 @@ metadata:
   name: live-service
   namespace: streamio
 spec:
+  type: LoadBalancer
   ports:
   - port: 5005
     targetPort: 5005
   selector:
     app: live-service
-  type: ClusterIP
 ---
 
 

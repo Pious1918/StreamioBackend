@@ -8,3 +8,7 @@
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"PUT\",\"url\":\"/updateviews\",\"status\":\"200\",\"responseTime\":\"2.401\"}","timestamp":"2024-12-19T03:05:22.320Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/video/672b2639467bb75f87c5f750\",\"status\":\"200\",\"responseTime\":\"614.282\"}","timestamp":"2024-12-19T03:05:22.985Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/fetchOther/672b2639467bb75f87c5f750\",\"status\":\"200\",\"responseTime\":\"1128.337\"}","timestamp":"2024-12-19T03:05:23.508Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/videos?tab=All\",\"status\":\"200\",\"responseTime\":\"159.459\"}","timestamp":"2024-12-19T03:24:03.197Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/videos?tab=All\",\"status\":\"200\",\"responseTime\":\"247.234\"}","timestamp":"2024-12-19T03:50:03.327Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/videos?tab=All\",\"status\":\"200\",\"responseTime\":\"276.428\"}","timestamp":"2024-12-19T03:51:17.202Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/videos?tab=All\",\"status\":\"304\",\"responseTime\":\"499.666\"}","timestamp":"2024-12-19T03:51:28.638Z"}

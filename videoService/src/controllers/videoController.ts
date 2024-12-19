@@ -175,7 +175,7 @@ export class VideoController implements IVideoController {
                             })),
                         }));
 
-                        console.log("all comments are", comments)
+                        console.log("all comments are")
                         resolve(comments);
                     });
                 });
@@ -207,7 +207,7 @@ export class VideoController implements IVideoController {
                             email: response.email,
                             following: response.following || []
                         });
-                        console.log("response of viewer datat", response)
+                        console.log("response of viewer datat")
                     })
                 })
             }
@@ -348,7 +348,7 @@ export class VideoController implements IVideoController {
 
             // const videos = await this._videoService.getVideos()
 
-            console.log("videos @conter", videos)
+            console.log("videos @conter")
             res.status(200).json(videos)
 
         } catch (error) {
