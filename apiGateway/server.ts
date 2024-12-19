@@ -19,7 +19,7 @@ app.use(express.json({limit: "100mb"}));
 app.use(express.static("public"))
 app.use(express.json());
 app.use(cors({
-    origin:'http://localhost:4200',
+    origin: process.env.DOMAIN,
     credentials: true  // Allow cookies to be sent and received
 
 }))
