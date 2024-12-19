@@ -5,9 +5,10 @@ import http from 'http';
 
 
 const server = http.createServer(app)
-const io = new Server(server, {
-  cors: { origin: '*' },
-  path: '/socket.io',
+const io = new Server(server,{
+  cors:{
+    origin:"*"
+  }
 })
 
 

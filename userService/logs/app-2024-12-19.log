@@ -1,0 +1,13 @@
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getbanner\",\"status\":\"200\",\"responseTime\":\"117.006\"}","timestamp":"2024-12-19T02:56:29.520Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/userprofile\",\"status\":\"200\",\"responseTime\":\"322.103\"}","timestamp":"2024-12-19T02:56:29.669Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/userprofile\",\"status\":\"304\",\"responseTime\":\"137.201\"}","timestamp":"2024-12-19T02:57:27.705Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getbanner\",\"status\":\"304\",\"responseTime\":\"65.873\"}","timestamp":"2024-12-19T02:59:32.407Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/userprofile\",\"status\":\"304\",\"responseTime\":\"141.903\"}","timestamp":"2024-12-19T02:59:32.837Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/userprofile\",\"status\":\"304\",\"responseTime\":\"150.251\"}","timestamp":"2024-12-19T02:59:39.748Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/userprofile\",\"status\":\"304\",\"responseTime\":\"111.104\"}","timestamp":"2024-12-19T03:01:48.134Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getbanner\",\"status\":\"304\",\"responseTime\":\"92.300\"}","timestamp":"2024-12-19T03:01:51.693Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/userprofile\",\"status\":\"304\",\"responseTime\":\"123.327\"}","timestamp":"2024-12-19T03:01:51.834Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/userprofile\",\"status\":\"304\",\"responseTime\":\"172.802\"}","timestamp":"2024-12-19T03:01:53.697Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getbanner\",\"status\":\"304\",\"responseTime\":\"50.244\"}","timestamp":"2024-12-19T03:02:39.102Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/userprofile\",\"status\":\"304\",\"responseTime\":\"172.368\"}","timestamp":"2024-12-19T03:02:39.228Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/userprofile\",\"status\":\"304\",\"responseTime\":\"493.024\"}","timestamp":"2024-12-19T03:04:16.627Z"}

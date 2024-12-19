@@ -14,3 +14,6 @@
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getalllives\",\"status\":\"200\",\"responseTime\":\"155.571\"}","timestamp":"2024-12-18T13:37:36.861Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getalllives\",\"status\":\"304\",\"responseTime\":\"185.107\"}","timestamp":"2024-12-18T13:37:39.819Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"DELETE\",\"url\":\"/deleteStreamdata/97523592-b704-41b1-9466-396d9b61beb4\",\"status\":\"200\",\"responseTime\":\"241.992\"}","timestamp":"2024-12-18T13:40:01.336Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/live-service/generate-presigned-url\",\"status\":\"404\",\"responseTime\":\"34.878\"}","timestamp":"2024-12-18T14:31:36.663Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/live-service/generate-presigned-url\",\"status\":\"404\",\"responseTime\":\"1.406\"}","timestamp":"2024-12-18T14:33:31.750Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/live-service/generate-presigned-url\",\"status\":\"404\",\"responseTime\":\"0.945\"}","timestamp":"2024-12-18T14:35:01.479Z"}
