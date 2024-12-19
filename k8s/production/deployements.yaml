@@ -1,0 +1,261 @@
+# api-gateway
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: streamio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: nspious/streamio-api-gateway:latest
+        ports:
+          - containerPort: 5000
+        envFrom:
+          - secretRef:
+              name: api-gateway-secrets
+  
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: streamio
+spec:
+  ports:
+  - port: 5000
+    targetPort: 5000
+  selector:
+    app: api-gateway
+  type: ClusterIP
+---
+
+
+
+#userservice
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: streamio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+      - name: user-service
+        image: nspious/streamio-user-service:latest
+        ports:
+          - containerPort: 5001
+          - containerPort: 50054
+        envFrom:
+          - secretRef:
+              name: user-service-secrets
+    
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: streamio
+spec:
+  ports:
+  - name: http
+    port: 5001
+    targetPort: 5001
+  - name: grpc
+    port: 50054
+    targetPort: 50054
+  selector:
+    app: user-service
+  type: ClusterIP
+---
+
+
+#commentservice
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comment-service
+  namespace: streamio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comment-service
+  template:
+    metadata:
+      labels:
+        app: comment-service
+    spec:
+      containers:
+      - name: comment-service
+        image: nspious/streamio-user-service:latest
+        ports:
+          - containerPort: 5003
+          - containerPort: 50051
+        envFrom:
+          - secretRef:
+              name: comment-service-secrets
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comment-service
+  namespace: streamio
+spec:
+  ports:
+  - name: http
+    port: 5003
+    targetPort: 5003
+  - name: grpc
+    port: 50051
+    targetPort: 50051
+  selector:
+    app: comment-service
+  type: ClusterIP
+---
+
+
+
+#liveservice
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: live-service
+  namespace: streamio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: live-service
+  template:
+    metadata:
+      labels:
+        app: live-service
+    spec:
+      containers:
+      - name: live-service
+        image: nspious/streamio-live-service:latest
+        ports:
+          - containerPort: 5005
+        envFrom:
+          - secretRef:
+              name: live-service-secrets
+    
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: live-service
+  namespace: streamio
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5005
+    targetPort: 5005
+  selector:
+    app: live-service
+---
+
+
+
+#videoservice
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video-service
+  namespace: streamio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: video-service
+  template:
+    metadata:
+      labels:
+        app: video-service
+    spec:
+      containers:
+      - name: video-service
+        image: nspious/streamio-video-service:latest
+        ports:
+          - containerPort: 5002
+        envFrom:
+          - secretRef:
+              name: video-service-secrets
+ 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: video-service
+  namespace: streamio
+spec:
+  ports:
+  - port: 5002
+    targetPort: 5002
+  selector:
+    app: video-service
+  type: ClusterIP
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+  namespace: streamio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq
+        ports:
+        - containerPort: 5672
+        - containerPort: 15672
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  namespace: streamio
+spec:
+  ports:
+  - name: amqp
+    port: 5672
+    targetPort: 5672
+  - name: management
+    port: 15672
+    targetPort: 15672
+  selector:
+    app: rabbitmq
+  type: ClusterIP
+---
