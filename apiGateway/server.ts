@@ -19,7 +19,7 @@ app.use(express.json({limit: "100mb"}));
 app.use(express.static("public"))
 app.use(express.json());
 app.use(cors({
-    origin: process.env.DOMAIN,
+    origin: 'https://streamio-frontend-kzuy.vercel.app',
     credentials: true  // Allow cookies to be sent and received
 
 }))

@@ -6,3 +6,11 @@
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getalllives\",\"status\":\"200\",\"responseTime\":\"504.793\"}","timestamp":"2024-12-19T03:51:21.977Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/saveStreamdata\",\"status\":\"200\",\"responseTime\":\"468.723\"}","timestamp":"2024-12-19T03:51:30.986Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getalllives\",\"status\":\"200\",\"responseTime\":\"221.774\"}","timestamp":"2024-12-19T03:51:34.523Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/generate-presigned-url\",\"status\":\"200\",\"responseTime\":\"521.454\"}","timestamp":"2024-12-19T05:31:18.450Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/saveStreamdata\",\"status\":\"200\",\"responseTime\":\"602.122\"}","timestamp":"2024-12-19T05:31:57.209Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/generate-presigned-url\",\"status\":\"200\",\"responseTime\":\"6949.360\"}","timestamp":"2024-12-19T05:42:56.153Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/saveStreamdata\",\"status\":\"200\",\"responseTime\":\"16385.745\"}","timestamp":"2024-12-19T05:43:38.007Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getalllives\",\"status\":\"200\",\"responseTime\":\"20714.915\"}","timestamp":"2024-12-19T05:43:47.440Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getalllives\",\"status\":\"304\",\"responseTime\":\"186.506\"}","timestamp":"2024-12-19T05:44:44.804Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getalllives\",\"status\":\"200\",\"responseTime\":\"329.716\"}","timestamp":"2024-12-19T05:58:31.166Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"DELETE\",\"url\":\"/deleteStreamdata/5c42aef2-d1ba-4093-a122-819fea083122\",\"status\":\"200\",\"responseTime\":\"849.455\"}","timestamp":"2024-12-19T05:59:20.608Z"}

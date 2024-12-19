@@ -17,7 +17,7 @@ const app = express()
 const morganFormat = ":method :url :status :response-time ms";
 
 app.use(cors({
-    origin: 'http://localhost:4200', 
+    origin: 'https://streamio-frontend-kzuy.vercel.app', 
 }));
 
 

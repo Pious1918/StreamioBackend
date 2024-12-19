@@ -33,3 +33,4 @@
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/video/6763b78e56941792c65f52c9\",\"status\":\"-\",\"responseTime\":\"-\"}","timestamp":"2024-12-19T06:06:49.689Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/video/6763b78e56941792c65f52c9\",\"status\":\"-\",\"responseTime\":\"-\"}","timestamp":"2024-12-19T06:07:41.725Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/video/6763b78e56941792c65f52c9\",\"status\":\"200\",\"responseTime\":\"21683.743\"}","timestamp":"2024-12-19T06:08:03.721Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/videos?tab=All\",\"status\":\"200\",\"responseTime\":\"277.468\"}","timestamp":"2024-12-19T10:54:11.529Z"}
