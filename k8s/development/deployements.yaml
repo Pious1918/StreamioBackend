@@ -121,7 +121,7 @@ spec:
     spec:
       containers:
       - name: comment-service
-        image: nspious/streamio-user-service:latest
+        image: nspious/streamio-comment-service:latest
         ports:
           - containerPort: 5003
           - containerPort: 50051

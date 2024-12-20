@@ -17,7 +17,7 @@ import likedModel from "../models/likedVModel";
 import redisClient from "../utils/redisClient";
 
 // const randomVideoName = (bytes=32)=>crypto.randomBytes(bytes).toString('hex')
-const RABBITMQ_URL = 'amqp://rabbitmq.streamio.svc.cluster.local'; // RabbitMQ URL, 
+const RABBITMQ_URL = 'amqp://rabbitmq'; // RabbitMQ URL, 
 
 interface CommentResponse {
     comments: Array<string>; // Replace `any` with the specific type of comment
