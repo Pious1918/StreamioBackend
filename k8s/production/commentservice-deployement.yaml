@@ -1,0 +1,45 @@
+#commentservice
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comment-service
+  namespace: streamio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comment-service
+  template:
+    metadata:
+      labels:
+        app: comment-service
+    spec:
+      containers:
+      - name: comment-service
+        image: nspious/streamio-user-service:latest
+        ports:
+          - containerPort: 5003
+          - containerPort: 50051
+        envFrom:
+          - secretRef:
+              name: comment-service-secrets
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comment-service
+  namespace: streamio
+spec:
+  ports:
+  - name: http
+    port: 5003
+    targetPort: 5003
+  - name: grpc
+    port: 50051
+    targetPort: 50051
+  selector:
+    app: comment-service
+  type: ClusterIP
+---
+

@@ -78,3 +78,14 @@
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/generate-video-presigned-url\",\"status\":\"200\",\"responseTime\":\"11048.505\"}","timestamp":"2024-12-19T12:37:42.435Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/generate-video-presigned-url\",\"status\":\"200\",\"responseTime\":\"60.450\"}","timestamp":"2024-12-19T12:37:42.744Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/convert\",\"status\":\"500\",\"responseTime\":\"17271.362\"}","timestamp":"2024-12-19T12:38:05.445Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/videos?tab=All\",\"status\":\"200\",\"responseTime\":\"223.136\"}","timestamp":"2024-12-19T13:12:57.989Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/generate-video-presigned-url\",\"status\":\"200\",\"responseTime\":\"24.082\"}","timestamp":"2024-12-19T13:13:30.665Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/generate-video-presigned-url\",\"status\":\"200\",\"responseTime\":\"10.073\"}","timestamp":"2024-12-19T13:13:30.691Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/convert\",\"status\":\"200\",\"responseTime\":\"74.292\"}","timestamp":"2024-12-19T13:13:36.580Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/videos?tab=All\",\"status\":\"304\",\"responseTime\":\"178.920\"}","timestamp":"2024-12-19T13:14:05.629Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/videos?tab=All\",\"status\":\"200\",\"responseTime\":\"155.309\"}","timestamp":"2024-12-19T13:15:15.580Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getprivatevideos\",\"status\":\"200\",\"responseTime\":\"90.253\"}","timestamp":"2024-12-19T13:15:16.966Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getuseruploadedvideo\",\"status\":\"200\",\"responseTime\":\"225.329\"}","timestamp":"2024-12-19T13:15:17.114Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getwatchlatervideos\",\"status\":\"200\",\"responseTime\":\"282.709\"}","timestamp":"2024-12-19T13:15:17.208Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/getreportvideos\",\"status\":\"200\",\"responseTime\":\"940.870\"}","timestamp":"2024-12-19T13:15:17.874Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/videos?tab=All\",\"status\":\"304\",\"responseTime\":\"173.429\"}","timestamp":"2024-12-19T13:15:22.989Z"}
