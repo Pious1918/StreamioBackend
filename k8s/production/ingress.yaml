@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: streamio-ingress
   namespace: streamio
+  annotations:
+    nginx.ingress.kubernetes.io/enable-websocket: "true"  # Enable WebSocket support
 spec:
   ingressClassName: nginx
   rules:
