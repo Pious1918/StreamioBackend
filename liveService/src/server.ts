@@ -5,11 +5,13 @@ import http from 'http';
 
 
 const server = http.createServer(app)
-const io = new Server(server,{
-  cors:{
-    origin:"*"
-  }
-})
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+  },
+  path: '/live-service',  // Ensure this path matches the frontend
+});
+
 
 
 

@@ -9,6 +9,7 @@ import cors from 'cors';
 import proxy from 'express-http-proxy'
 import morgan from "morgan"
 import { AuthMiddleware } from "./middlewares/authmiddleware";
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 dotenv.config()
 
@@ -30,8 +31,14 @@ app.use('/user-service', proxy('http://user-service:5001'));
 app.use('/video-service', proxy('http://video-service:5002'))
 
 app.use('/comment-service', proxy('http://comment-service:5003'))
-app.use('/live-service', proxy('http://live-service:5005'))
+// app.use('/live-service', proxy('http://live-service:5005'))
 
+app.use('/live-service', createProxyMiddleware({
+    target: 'http://live-service:5005',
+    ws: true, // This ensures that WebSocket connections are handled
+    changeOrigin: true,
+    pathRewrite: { '^/live-service': '' },
+  }));
 
 
 
