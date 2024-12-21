@@ -5,32 +5,12 @@ import http from 'http';
 
 
 const server = http.createServer(app)
+const io = new Server(server,{
+  cors:{
+    origin:"*"
+  }
+})
 
-
-
-// const io = new Server(server, {
-//   path: '/socket.io',  // Default Socket.IO path
-//   cors: {
-//     origin: "https://streamio-frontend-kzuy.vercel.app", // Replace with your frontend URL
-//     methods: ["GET", "POST"],
-//     credentials: true
-//   },
-//   transports: ['websocket', 'polling'],
-//   allowEIO3: true
-// });
-
-
-
-const io = new Server(server, {
-  path: '/socket.io',  // Do not change this unless the proxy is adjusted
-  cors: {
-    origin: "https://streamio-frontend-kzuy.vercel.app",
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-  transports: ['websocket', 'polling'],
-  allowEIO3: true,
-});
 
 
 
