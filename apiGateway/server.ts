@@ -32,15 +32,32 @@ app.use('/video-service', proxy('http://video-service:5002'))
 app.use('/comment-service', proxy('http://comment-service:5003'))
 // app.use('/live-service', proxy('http://live-service:5005'))
 
-app.use('/live-service', proxy('http://live-service:5005', {
-    proxyReqPathResolver: (req) => req.originalUrl.replace('/live-service', '/socket.io'),
-  }));
-  
-
-  app.use('/live-service', (req, res, next) => {
+app.use('/live-service', (req, res, next) => {
     console.log(`Proxying request: ${req.method} ${req.originalUrl}`);
     next();
   });
+  
+  // Route WebSocket-related requests to the Socket.IO endpoint
+  app.use(
+    '/live-service/socket.io',
+    proxy('http://live-service:5005', {
+      proxyReqPathResolver: (req) => {
+        return req.originalUrl.replace('/live-service/socket.io', '/socket.io');
+      },
+      proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+        proxyReqOpts.headers!['Origin'] = 'http://live-service:5005';
+        return proxyReqOpts;
+      },
+    })
+  );
+  
+  // Route all other `/live-service` requests normally
+  app.use(
+    '/live-service',
+    proxy('http://live-service:5005', {
+      proxyReqPathResolver: (req) => req.originalUrl.replace('/live-service', '/live-service'),
+    })
+  );
   
 
 // WebSocket Proxy for Live Service
