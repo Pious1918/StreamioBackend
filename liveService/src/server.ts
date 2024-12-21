@@ -15,7 +15,6 @@ const io = new Server(server, {
     origin: "https://streamio-frontend-kzuy.vercel.app", // Allow your frontend
     methods: ["GET", "POST"],
   },
-  path: '/live-service/socket.io', // Set the custom path here
 });
 
 
