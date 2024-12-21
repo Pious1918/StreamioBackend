@@ -49,6 +49,11 @@ app.use(
   );
   
 
+  app.use('/socket.io', (req, res, next) => {
+    res.redirect('/live-service/socket.io' + req.url);
+  });
+  
+
 
 
 const port = process.env.SERVER_PORT || 5000 
