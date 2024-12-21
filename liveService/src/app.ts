@@ -18,6 +18,7 @@ const morganFormat = ":method :url :status :response-time ms";
 
 app.use(cors({
     origin: 'https://streamio-frontend-kzuy.vercel.app', 
+    credentials:true
 }));
 
 

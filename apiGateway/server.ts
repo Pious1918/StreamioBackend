@@ -30,7 +30,18 @@ app.use('/user-service', proxy('http://user-service:5001'));
 app.use('/video-service', proxy('http://video-service:5002'))
 
 app.use('/comment-service', proxy('http://comment-service:5003'))
-app.use('/live-service', proxy('http://live-service:5005'))
+// app.use('/live-service', proxy('http://live-service:5005'))
+
+app.use('/live-service', proxy('http://live-service:5005', {
+    proxyReqPathResolver: (req) => req.originalUrl.replace('/live-service', '/socket.io'),
+  }));
+  
+
+  app.use('/live-service', (req, res, next) => {
+    console.log(`Proxying request: ${req.method} ${req.originalUrl}`);
+    next();
+  });
+  
 
 // WebSocket Proxy for Live Service
 // app.use(
