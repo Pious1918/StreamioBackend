@@ -5,15 +5,21 @@ import http from 'http';
 
 
 const server = http.createServer(app)
+// const io = new Server(server, {
+//   cors: {
+//     origin: '*',
+//   },
+//   path: '/live-service',  // Ensure this path matches the frontend
+// });
+
+
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: 'https://streamio-frontend-kzuy.vercel.app',  // Ensure this matches the frontend
+    credentials: true,
   },
-  path: '/live-service',  // Ensure this path matches the frontend
+  path: '/socket.io',  // Ensure this matches the path being proxied in the API Gateway
 });
-
-
-
 
 
 // ******************************************************************

@@ -33,14 +33,12 @@ app.use('/video-service', proxy('http://video-service:5002'))
 app.use('/comment-service', proxy('http://comment-service:5003'))
 app.use('/live-service', proxy('http://live-service:5005'))
 
-app.use('/live-service', createProxyMiddleware({
+// Proxy WebSocket connections separately
+app.use('/socket.io', createProxyMiddleware({
     target: 'http://live-service:5005',
-    ws: true, // This ensures that WebSocket connections are handled
+    ws: true,  // This ensures WebSocket connections are handled properly
     changeOrigin: true,
-    pathRewrite: { '^/live-service': '' },
   }));
-
-
 
 const port = process.env.SERVER_PORT || 5000 
 
