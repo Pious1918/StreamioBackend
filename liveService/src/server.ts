@@ -5,17 +5,12 @@ import http from 'http';
 
 
 const server = http.createServer(app)
-// const io = new Server(server,{
-//   cors:{
-//     origin:"*"
-//   }
-// })
-const io = new Server(server, {
-  cors: {
-    origin: "https://streamio-frontend-kzuy.vercel.app", // Allow your frontend
-    methods: ["GET", "POST"],
-  },
-});
+const io = new Server(server,{
+  cors:{
+    origin:"*"
+  }
+})
+
 
 
 
