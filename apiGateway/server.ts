@@ -33,25 +33,25 @@ app.use('/comment-service', proxy('http://comment-service:5003'))
 app.use('/live-service', proxy('http://live-service:5005'))
 
 // WebSocket Proxy for Live Service
-app.use(
-    '/live-service/socket.io',
-    proxy('http://live-service:5005', {
-      proxyReqPathResolver: (req) => {
-        // Rewrite the path to match the live-service
-        return req.originalUrl.replace('/live-service/socket.io', '/socket.io');
-      },
-      proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
-        // Update headers for CORS or WebSocket origin
-        proxyReqOpts.headers!['Origin'] = 'http://live-service:5005';
-        return proxyReqOpts;
-      },
-    })
-  );
+// app.use(
+//     '/live-service/socket.io',
+//     proxy('http://live-service:5005', {
+//       proxyReqPathResolver: (req) => {
+//         return req.originalUrl.replace('/live-service/socket.io', '/socket.io');
+//       },
+//       proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+//         proxyReqOpts.headers!['Origin'] = 'http://live-service:5005';
+//         return proxyReqOpts;
+//       },
+//       // Enable WebSocket upgrades
+//       ws: true,
+//     })
+//   );
   
 
-  app.use('/socket.io', (req, res, next) => {
-    res.redirect('/live-service/socket.io' + req.url);
-  });
+//   app.use('/socket.io', (req, res, next) => {
+//     res.redirect('/live-service/socket.io' + req.url);
+//   });
   
 
 
