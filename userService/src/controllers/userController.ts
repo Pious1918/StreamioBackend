@@ -44,13 +44,13 @@ export class UserController implements IUserController {
         ]);
 
         // Aggregate validation results
-        const errors: { email?: string; username?: string } = {};
-        if (existingEmail) errors.email = "Email already exists";
-        if (existingUsername) errors.username = "Username already exists";
+        const existmessages: { email?: string; username?: string } = {};
+        if (existingEmail) existmessages.email = "Email already exists";
+        if (existingUsername) existmessages.username = "Username already exists";
 
         // If there are any validation errors, return them
-        if (Object.keys(errors).length > 0) {
-             res.status(200).json({ errors });
+        if (Object.keys(existmessages).length > 0) {
+             res.status(200).json({ existmessages });
              return
         }
 
