@@ -36,6 +36,28 @@ export class UserController implements IUserController {
         console.log(req.body)
         try {
 
+
+                // Perform both checks simultaneously
+        const [existingEmail, existingUsername] = await Promise.all([
+            this._userService.findByemail(email as string),
+            this._userService.findByUsername(username as string)
+        ]);
+
+        // Aggregate validation results
+        const errors: { email?: string; username?: string } = {};
+        if (existingEmail) errors.email = "Email already exists";
+        if (existingUsername) errors.username = "Username already exists";
+
+        // If there are any validation errors, return them
+        if (Object.keys(errors).length > 0) {
+             res.status(200).json({ errors });
+             return
+        }
+
+
+
+
+
             const user = await this._userService.registerUser(username, email, password, mobile, country)
 
             //generating token after registartion
@@ -72,44 +94,6 @@ export class UserController implements IUserController {
         }
     }
 
-
-
-    //loggin in the registered user
-    // public loginuser = async (req: Request, res: Response, next: NextFunction) => {
-    //     const { email, password } = req.body
-    //     console.log(email)
-
-    //     try {
-
-    //         const result = await this._userService.login(email, password)
-    //         console.log("data is ", result)
-
-    //         // Check if the user's status is active
-    //         if (result.status !== 'active') {
-
-    //             res.status(403).json({ message: 'User is blocked' });
-    //             return
-    //         }
-
-
-    //         const token = generateToken(result)
-    //         // const userRefreshtoken = generateRefreshToken(result)
-    //         // res.status(200).json({ message: 'Login successfull', token, userRefreshtoken })
-    //         res.status(200).json({ message: 'Login successfull', token })
-
-    //     } catch (error: any) {
-
-
-    //         if (error.message === 'invalid email') {
-    //             res.status(404).json({ error: 'user not found' })
-    //         }
-    //         if (error.message == 'Invalid password') {
-    //             res.status(401).json({ error: 'Invalid password' })
-    //         }
-
-    //         next(error)
-    //     }
-    // }
 
 
 
