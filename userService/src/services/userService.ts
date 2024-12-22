@@ -56,8 +56,8 @@ export class UserService implements IUserService {
         return this._userRepository.findByEmail(email)
     }
 
-    async findByUsername(username: string): Promise<IuserDocument | null> {
-        return this._userRepository.findOne({ username });
+    async findByUsername(name: string): Promise<IuserDocument | null> {
+        return this._userRepository.findOne({ name });
     }
     
 
