@@ -21,40 +21,40 @@ app.use(cors({
 app.use(morgan('tiny')); 
 
 // Global Authorization Middleware with route exclusion
-// app.use((req: any, res: Response, next: NextFunction) => {
-//     const exemptedPaths = [
-//         "/user-service/login", // Add paths to exclude here
-//     ];
+app.use((req: any, res: Response, next: NextFunction) => {
+    const exemptedPaths = [
+        "/user-service/login", // Add paths to exclude here
+    ];
 
-//     if (exemptedPaths.includes(req.originalUrl)) {
-//         console.log(`Skipping authorization for path: ${req.originalUrl}`);
-//         return next(); // Skip authorization
-//     }
+    if (exemptedPaths.includes(req.originalUrl)) {
+        console.log(`Skipping authorization for path: ${req.originalUrl}`);
+        return next(); // Skip authorization
+    }
 
-//     console.log("Authorizing request...");
-//     authMiddleware
-//         .authorize(req, res, next)
-//         .then(() => {
-//             console.log(`Token validated. User ID: ${req.userId}`);
-//             next(); // Proceed to the next middleware if authorization succeeds
-//         })
-//         .catch((error) => {
-//             console.error("Authorization failed:", error);
-//             res.status(401).json({ error: "Unauthorized" }); // Respond with unauthorized if authorization fails
-//         });
-// });
+    console.log("Authorizing request...");
+    authMiddleware
+        .authorize(req, res, next)
+        .then(() => {
+            console.log(`Token validated. User ID: ${req.userId}`);
+            next(); // Proceed to the next middleware if authorization succeeds
+        })
+        .catch((error) => {
+            console.error("Authorization failed:", error);
+            res.status(401).json({ error: "Unauthorized" }); // Respond with unauthorized if authorization fails
+        });
+});
 
 
 
 
 // Proxy with userId injection
-// app.use("/user-service", (req:IAuthRequest, res, next) => {
-//     console.log(`[USER SERVICE] Forwarding request with User ID: ${req.userId}`);
-//     req.headers["x-user-id"] = req.userId; // Inject userId into the headers
-//     proxy("http://user-service:5001")(req, res, next);
-// });
+app.use("/user-service", (req:IAuthRequest, res, next) => {
+    console.log(`[USER SERVICE] Forwarding request with User ID: ${req.userId}`);
+    req.headers["x-user-id"] = req.userId; // Inject userId into the headers
+    proxy("http://user-service:5001")(req, res, next);
+});
 
-app.use('/user-service', proxy('http://user-service:5001'));
+// app.use('/user-service', proxy('http://user-service:5001'));
 
 app.use('/video-service', proxy('http://video-service:5002'))
 
