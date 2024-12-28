@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import proxy from 'express-http-proxy'
 import morgan from "morgan"
-import { AuthMiddleware } from "./middlewares/authmiddleware";
+import { AuthMiddleware, IAuthRequest } from "./middlewares/authmiddleware";
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 dotenv.config()
@@ -19,7 +19,27 @@ app.use(cors({
 }))
 
 app.use(morgan('tiny')); 
-app.use('/user-service', proxy('http://user-service:5001'));
+
+app.use(async (req:IAuthRequest, res, next) => {
+    try {
+        console.log("Authorizing request..."); // Log that authorization is starting
+        await authMiddleware.authorize(req, res, next); // Authorize the user
+        console.log(`Token validated. User ID: ${req.userId}`); // Log the userId extracted from the token
+    } catch (error) {
+        console.error("Authorization failed:", error);
+    }
+});
+
+
+
+// Proxy with userId injection
+app.use("/user-service", (req:IAuthRequest, res, next) => {
+    console.log(`[USER SERVICE] Forwarding request with User ID: ${req.userId}`);
+    req.headers["x-user-id"] = req.userId; // Inject userId into the headers
+    proxy("http://user-service:5001")(req, res, next);
+});
+
+// app.use('/user-service', proxy('http://user-service:5001'));
 
 app.use('/video-service', proxy('http://video-service:5002'))
 
