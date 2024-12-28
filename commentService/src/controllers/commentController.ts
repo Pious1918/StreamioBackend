@@ -1,13 +1,12 @@
 import { Request, Response } from 'express'
 import IAuthRequest from '../interfaces/requestInterfaces';
 import { CommentService } from '../services/commentService';
+import { StatusCodes } from '../enums/statusCode.enums';
 
 
 
 
 export class CommentController {
-
-
 
     private _commentService: CommentService
 
@@ -16,46 +15,51 @@ export class CommentController {
     }
 
 
-    ///HTTP method for posting a comment
     public postComment = async (req: IAuthRequest, res: Response) => {
         try {
+
             const { comment, videoId } = req.body;
             const userId = req.user?.userId
-            const userName =req.user?.name
-            console.log("coommetn", comment)
-            console.log("coommetn", videoId)
-            console.log("userid", userId)
+            const userName = req.user?.name
+
             if (!userId) {
-                res.status(400).json({ error: "User ID is required" });
+                res.status(StatusCodes.BAD_REQUEST).json({ error: "User ID is required" });
                 return;
             }
+
             if (!userName) {
-                res.status(400).json({ error: "User name is required" });
+                res.status(StatusCodes.BAD_REQUEST).json({ error: "User name is required" });
                 return;
             }
-            const commntdata = await this._commentService.postComment(userId, videoId, userName ,comment)
-            console.log("commentdata", commntdata)
-            res.status(200).json({
+
+            const commntdata = await this._commentService.postComment(userId, videoId, userName, comment)
+            res.status(StatusCodes.OK).json({
                 status: 'success',
                 message: 'Comment posted successfully',
                 commntdata,
             });
-        } catch (error) {
-            console.error("Error posting comment:", error);
 
-            res.status(500).json({ error: 'Failed to post comment', details: "message" });
+        } catch (error) {
+
+            console.error("Error posting comment:", error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Failed to post comment', details: "message" });
 
         }
     }
 
-    // HTTP method for getting comments
+
+
     public getComments = async (req: Request, res: Response) => {
+
         try {
             const { videoId } = req.params;
             const comments = await this._commentService.getComments(videoId);
-            res.status(200).json({ comments });
+            res.status(StatusCodes.OK).json({ comments });
+
         } catch (error) {
-            res.status(500).json({ error: 'Failed to retrieve comments', details: "error.message" });
+
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Failed to retrieve comments', details: "error.message" });
+
         }
     }
 
@@ -65,27 +69,30 @@ export class CommentController {
 
             const userId = req.user?.userId
             const userName = req.user?.name
-            console.log(req.body)
             const commentId = req.body.cId
             const reply = req.body.reply
+
             if (!userId) {
-                res.status(400).send("User is not authenticated");
-                return
-            }
-            if (!userName) {
-                res.status(400).send("User name not authenticated");
+                res.status(StatusCodes.BAD_REQUEST).send("User is not authenticated");
                 return
             }
 
-            console.log("userId commentId reply", userId, commentId, reply)
+            if (!userName) {
+                res.status(StatusCodes.BAD_REQUEST).send("User name not authenticated");
+                return
+            }
+
             const replyData = await this._commentService.addReply(userId, userName, commentId, reply)
-            res.status(200).json({
+            res.status(StatusCodes.OK).json({
                 message: "Reply added successfully",
-                reply: replyData // Assuming `replyData` is returned from the service
+                reply: replyData
             });
+
         } catch (error) {
+
             console.error("Error in replyComment:", error);
-             res.status(500).send("Internal server error");
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal server error");
+
         }
     }
 

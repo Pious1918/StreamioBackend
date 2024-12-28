@@ -1,5 +1,3 @@
-
-
 import mongoose , {Document ,Schema} from 'mongoose'
 
 export interface IliveDocument extends Document{
@@ -10,8 +8,6 @@ export interface IliveDocument extends Document{
     streamerId:string,
     createdAt?:Date
 }
-
-
 
 const liveSchema:Schema = new Schema({
 

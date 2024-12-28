@@ -3,9 +3,6 @@ import { Visibility } from "../enums/visibility.enum";
 import { PaidStatus } from "../enums/paidStatus.enum";
 import { IvideoDocument } from "../interfaces/IvideoDocument.interface";
 
-
-
-// Create the video schema
 const videoSchema: Schema = new Schema({
     uploaderId: { type: String, required: true },
     title: { type: String, required: true },
@@ -18,17 +15,18 @@ const videoSchema: Schema = new Schema({
     category: { type: String, required: true },
     visibility: { 
         type: String, 
-        default: Visibility.PUBLIC, // Set default to public
+        default: Visibility.PUBLIC, 
         required: true 
     },
-    price: { type: Number, default: 0}, // Assuming price is required
+    price: { type: Number, default: 0}, 
     paid: { 
         type: String, 
-        default: PaidStatus.UNPAID, // Set default to unpaid
+        default: PaidStatus.UNPAID, 
         required: true 
     },
-    createdAt: { type: Date, default: Date.now } , // Ensure createdAt field is here
+    createdAt: { type: Date, default: Date.now } ,
 
 });
 const VideoModel = model<IvideoDocument>('Video', videoSchema);
+
 export default VideoModel;

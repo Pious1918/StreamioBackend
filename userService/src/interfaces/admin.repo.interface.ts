@@ -2,8 +2,6 @@ import { IadminDocument } from "../models/adminModel";
 
 export interface IAdminRepository {
     findByEmailAndRole(email: string, role: string): Promise<IadminDocument | null>;
-    // getAllUsers(): Promise<any>;
-
-    getAllUsers(limit: number, offset: number, search:string): Promise<any>; // Updated
+    getAllUsers(limit: number, offset: number, search:string): Promise<any>; 
 
 }

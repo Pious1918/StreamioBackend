@@ -2,10 +2,10 @@ import commentModel, { ICommentDocument } from "../models/commentModel";
 import { BaseRepository } from "./baseRepo";
 
 export interface IReplyComment {
-    userId: string;  
-    username:string;      // The ID of the user who posted the reply
-    comment: string;       // The text content of the reply
-    createdAt: Date;       // The timestamp of when the reply was created
+    userId: string;
+    username: string;
+    comment: string;
+    createdAt: Date;
 }
 
 
@@ -17,9 +17,8 @@ export class CommentRepository extends BaseRepository<ICommentDocument> {
 
 
     async postComment(commentData: Partial<ICommentDocument>): Promise<ICommentDocument> {
-        console.log("reached@COmment repo")
-       
-        if (!commentData.userId || !commentData.videoId || !commentData.username || !commentData.comment  ) {
+
+        if (!commentData.userId || !commentData.videoId || !commentData.username || !commentData.comment) {
             throw new Error('Missing required fields');
         }
         const savecomment = await this.save(commentData)
@@ -33,23 +32,27 @@ export class CommentRepository extends BaseRepository<ICommentDocument> {
 
 
     async updateReply(commentId: string, replyData: IReplyComment) {
+
         try {
-            // Use `findByIdAndUpdate` to find the comment by its ID and add the reply
+
             const updatedComment = await commentModel.findByIdAndUpdate(
                 commentId,
                 {
-                    $push: { replyComments: replyData }, // Push the reply to the array
+                    $push: { replyComments: replyData },
                 },
-                { new: true } // Return the updated document
+                { new: true }
             );
-    
+
             return updatedComment;
+
         } catch (error) {
+
             console.error("Error updating comment with reply:", error);
             throw new Error("Unable to update comment with reply");
+
         }
     }
-    
+
 
 
 }

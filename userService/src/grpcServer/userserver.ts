@@ -13,11 +13,9 @@ console.log("user proto is", userProto)
 async function GetChannelDetails(call: any, callback: any) {
 
     try {
-        const uploaderId = call.request._id;
-        console.log("uploader id", uploaderId)
-        const channelDetails = await userModel.findOne({ _id: uploaderId });
 
-        console.log("channel details are ", channelDetails)
+        const uploaderId = call.request._id;
+        const channelDetails = await userModel.findOne({ _id: uploaderId });
 
         if (!channelDetails) {
             return callback({
@@ -32,15 +30,18 @@ async function GetChannelDetails(call: any, callback: any) {
             name: channelDetails.name,
             email: channelDetails.email,
         });
-    } catch (error) {
-        console.error('Error in GetChannelDetails:', error);
 
+    } catch (error) {
+
+        console.error('Error in GetChannelDetails:', error);
         // Handle any unexpected errors
         callback({
             code: grpc.status.INTERNAL,
             message: 'Internal server error',
         });
+
     }
+
 }
 
 
@@ -48,11 +49,9 @@ async function GetChannelDetails(call: any, callback: any) {
 async function GetViewerDetails(call: any, callback: any) {
 
     try {
-        const userId = call.request._id;
-        console.log("uploader id", userId)
-        const viewerDetails = await userModel.findOne({ _id: userId });
 
-        console.log("user details are ", viewerDetails)
+        const userId = call.request._id;
+        const viewerDetails = await userModel.findOne({ _id: userId });
 
         if (!viewerDetails) {
             return callback({
@@ -68,6 +67,7 @@ async function GetViewerDetails(call: any, callback: any) {
             email: viewerDetails.email,
             following:viewerDetails.following
         });
+
     } catch (error) {
         console.error('Error in GetChannelDetails:', error);
 
@@ -76,15 +76,16 @@ async function GetViewerDetails(call: any, callback: any) {
             code: grpc.status.INTERNAL,
             message: 'Internal server error',
         });
+
     }
+
 }
 
 
 
 export function createGRPCServer(){
+
     const server = new grpc.Server()
-
     server.addService(userProto.service, {GetChannelDetails , GetViewerDetails})
-
     return server
 }

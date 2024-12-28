@@ -3,7 +3,6 @@ import * as protoLoader from '@grpc/proto-loader';
 import path from 'path';
 import VideoModel from '../models/videoModel';
 import { IvideoDocument } from '../interfaces/IvideoDocument.interface';
-// import commentModel from '../models/commentModel';
 const PROTO_PATH ='./proto/video.proto';
 
 
@@ -11,16 +10,12 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH , {})
 const videoPackage = grpc.loadPackageDefinition(packageDefinition)
 const videoProto:any = videoPackage.VideoService
 
-console.log("video protot is ",videoProto)
-
 
 async function GetVideosByUploader(call: any, callback: any) {
     try {
         const uploaderId = call.request.uploaderId;
-        console.log("uploaderid is",uploaderId)
-        const videos = await VideoModel.find({ uploaderId }); // Use async/await here
-        console.log("videos from grpcserver",videos)
-        // Format videos as per the gRPC message structure
+        const videos = await VideoModel.find({ uploaderId }); 
+        
         const response = {
             videos: videos.map(video => ({
                 uploaderId: video.uploaderId,

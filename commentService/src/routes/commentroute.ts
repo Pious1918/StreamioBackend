@@ -4,7 +4,7 @@ import express from 'express'
 import { CommentController } from "../controllers/commentController";
 import { AuthMiddleware } from "../middleware/authmiddleware";
 const router = Router()
-const authMiddleware = new AuthMiddleware(); // Create an instance of your AuthMiddleware
+const authMiddleware = new AuthMiddleware();
 
 
 const commentController = new CommentController()

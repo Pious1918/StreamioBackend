@@ -34,7 +34,7 @@ export class BaseRepository<T extends Document>{
     async findByIdAndUpdate(
         id: string,
         update: Partial<T>,
-        options?: Record<string, unknown> // Optional options parameter
+        options?: Record<string, unknown> 
     ): Promise<T | null> {
         return this._model.findByIdAndUpdate(id, update, options);
     }

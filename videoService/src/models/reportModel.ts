@@ -3,7 +3,7 @@ import {  IreportVDocument } from "../interfaces/IlikedVideoDocument.interface";
 
 
 const reportSchema: Schema = new Schema({
-  videoId: { type: String, required: true, unique: true }, // Ensure videoId is unique
+  videoId: { type: String, required: true, unique: true }, 
   uploaderId: { type: String, required: true },
   reasons: [
     {

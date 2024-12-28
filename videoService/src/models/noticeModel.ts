@@ -3,8 +3,8 @@ import {  InoticeDocument } from "../interfaces/IlikedVideoDocument.interface";
 
 
 const noticeSchema: Schema = new Schema({
-  videoId: { type: String, required: true, unique: true }, // Ensure videoId is unique
-  notice: { type: String, required: true}, // Ensure videoId is unique
+  videoId: { type: String, required: true, unique: true }, 
+  notice: { type: String, required: true}, 
 
 });
 

@@ -37,14 +37,6 @@ export const getPresignedUrl = async (fileName: string, fileType: string): Promi
 
 
 
-
-
-
-
-
-
-
-
 const s3Clientdele = new S3Client({
     region: 'eu-north-1',
     credentials: {

@@ -1,21 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-// import { File } from 'buffer';
+
 
 dotenv.config();
-
 export interface IPayload {
   userId: string;
   name: string;
   email: string;
-
-  // Add any other properties you included in the JWT payload
 }
 
 export interface IAuthRequest extends Request {
-  user?: IPayload; // Extend the Request interface to include user property
+  user?: IPayload; 
 }
+
 
 export class AuthMiddleware {
   public async authorize(req: IAuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -27,8 +25,8 @@ export class AuthMiddleware {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET as jwt.Secret) as unknown; // Cast to unknown first
-      req.user = decoded as IPayload; // Now cast to IPayload
+      const decoded = jwt.verify(token, process.env.JWT_SECRET as jwt.Secret) as unknown; 
+      req.user = decoded as IPayload; 
 
       next();
     } catch (error) {

@@ -1,10 +1,8 @@
 import multer from 'multer';
-
-
 import { ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
-import * as crypto from 'crypto'; // Import the crypto module
-
+import * as crypto from 'crypto'; 
 import dotenv from 'dotenv'
+
 dotenv.config()
 
 const randomImageName = (bytes=32)=> crypto.randomBytes(bytes).toString('hex')
@@ -19,9 +17,7 @@ const s3Client = new S3Client({
   });
 
 
- // Use multer's memory storage
 const storage = multer.memoryStorage(); 
-
 // Initializing multer with the memory storage
 const upload = multer({ storage });
 

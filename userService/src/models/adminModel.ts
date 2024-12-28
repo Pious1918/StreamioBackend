@@ -8,7 +8,7 @@ export interface IadminDocument extends Document{
     phonenumber : string;
     country : string;
     profilepicture:string;
-    role: string; // admin role field
+    role: string; 
     createdAt : Date;
     updatedAt : Date;
 
@@ -45,9 +45,8 @@ const adminSchema : Schema = new Schema({
     },
     role:{ 
         type: String, 
-        
         default: 'admin' 
-    }, // Default role is user
+    }, 
     
     createdAt:{
         type:Date,

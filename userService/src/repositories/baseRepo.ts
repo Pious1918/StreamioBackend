@@ -1,4 +1,3 @@
-
 import { Document, FilterQuery, Model } from "mongoose";
 import { IBaseRepository } from "../interfaces/base.repo.interface";
 
@@ -31,8 +30,8 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     async findAndUpdateSet(id: string, field: keyof T, value: string): Promise<T | null> {
         const result = await this.model.findByIdAndUpdate(
             id,
-            { $addToSet: { [field as string]: value } } as any,  // Bypass type check for the dynamic field
-            { new: true }  // Return the updated document
+            { $addToSet: { [field as string]: value } } as any,
+            { new: true } 
         ).exec();
     
         
@@ -43,24 +42,18 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     async uNfindAndUpdateSet(id: string, field: keyof T, value: string): Promise<T | null> {
         const result = await this.model.findByIdAndUpdate(
             id,
-            { $pull: { [field as string]: value } } as any,  // Bypass type check for the dynamic field
-            { new: true }  // Return the updated document
+            { $pull: { [field as string]: value } } as any,  
+            { new: true } 
         ).exec();
     
-        // Return the document or null
         return result ? result as T : null;
     }
     
 
-    
+
     async find(filter?: Partial<T> | undefined): Promise<T[]> {
         return this.model.find()
     }
 
-    
-    
-    
-    
-    
 
 }

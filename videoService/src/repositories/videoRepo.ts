@@ -31,7 +31,7 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
 
 
   async getCategoryvideo(category: string): Promise<IvideoDocument[]> {
-    return VideoModel.find({ category }); 
+    return VideoModel.find({ category });
 
   }
 
@@ -49,7 +49,7 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
   async findLikedStatus(userId: string, videoId: string): Promise<boolean> {
     try {
       const likedStatus = await likedModel.findOne({ userId, videoId });
-      return !!likedStatus; 
+      return !!likedStatus;
     } catch (error) {
       console.error("Error in findLikedStatus:", error);
       throw error;
@@ -59,7 +59,7 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
 
   async getReportAboveTen() {
     try {
-      // Fetch videos with report count > 10
+
       const videosWithHighReports = await VideoModel.find({ report: { $gt: 10 } });
 
       if (!videosWithHighReports.length) {
@@ -67,12 +67,9 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
       }
 
       const videoIds = videosWithHighReports.map((video) => video._id);
-
       const reportDetails = await reportModel.find({ videoId: { $in: videoIds } });
-
       const noticeDetails = await noticeModel.find({ videoId: { $in: videoIds } });
       const noticedVideoIds = new Set(noticeDetails.map((notice) => notice.videoId.toString()));
-
       const populatedVideos = videosWithHighReports.map((video) => {
         const reportsForVideo = reportDetails.filter(
           (report) => report.videoId.toString() === video._id.toString()
@@ -95,9 +92,8 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
         };
       });
 
-      console.log('Populated Videos with Reports:', populatedVideos);
-
       return populatedVideos;
+
     } catch (error) {
       console.error('Error in getReportAboveTen:', error);
       throw error;
@@ -111,18 +107,12 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
       console.log('reached @repository');
 
       const reportedVideos = await reportModel.find({ uploaderId: userId });
-
       const videoIds = reportedVideos.map((report: any) => report.videoId);
-
       const videoDetails = await VideoModel.find({ _id: { $in: videoIds } });
-
       const noticeDetails = await noticeModel.find({ videoId: { $in: videoIds } });
-
       const noticedVideoIds = new Set(noticeDetails.map((notice) => notice.videoId.toString()));
-
       const populatedVideos = reportedVideos.map((report: any) => {
         const videoDetail = videoDetails.find((video: any) => video._id.toString() === report.videoId.toString());
-
         const noticeSent = noticedVideoIds.has(report.videoId.toString());
 
         return {
@@ -132,24 +122,20 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
         };
       });
 
-      console.log("Populated Videos:", populatedVideos);
-
       return populatedVideos;
+
     } catch (error) {
+
       console.error("Error in getReportedVideosByUserId:", error);
       throw new Error('Failed to get reported videos');
+
     }
   }
 
 
-
-
-
-
   async uploadVideo(videoData: Partial<IvideoDocument>): Promise<IvideoDocument> {
-    console.log('reached@vrepo')
+   
     const savedVideo = await this.save(videoData);
-
 
     if (!savedVideo) {
       throw new Error("Failed to save video");
@@ -161,22 +147,23 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
 
   async likeVideo(likedata: any) {
     try {
-      console.log('reached@vrepo');
 
       const saveLikeVideo = new likedModel(likedata);
-
       const result = await saveLikeVideo.save();
-
       return result;
+
     } catch (error) {
+
       console.error('Error saving video:', error);
       throw new Error('Failed to save video');
+
     }
   }
 
+
   async saveNoticedata(noticedata: any) {
+
     try {
-      console.log('reached@vrepo');
 
       const existingNotice = await noticeModel.findOne({ videoId: noticedata.videoId });
 
@@ -191,32 +178,32 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
       };
 
       const savenoticedata = new noticeModel(data);
-
       const result = await savenoticedata.save();
-      console.log(`Notice saved successfully for videoId: ${noticedata.videoId}`);
       return { alreadyExists: false, result };
+
     } catch (error) {
       console.error('Error saving notice:', error);
       throw new Error('Failed to save notice');
     }
+
   }
 
 
 
   async saveVerifieddata(videoId: string) {
+
     try {
-      console.log('reached@vrepo', videoId);
 
       const deleteResult = await reportModel.deleteOne({ videoId });
+
       if (deleteResult.deletedCount === 0) {
-        console.log(`No report found with videoId: ${videoId}`);
         return { message: `No report found with videoId: ${videoId}` };
       } else {
         console.log(`Report with videoId: ${videoId} deleted successfully.`);
       }
 
-
       const deleteNoticeResult = await noticeModel.deleteOne({ videoId });
+
       if (deleteNoticeResult.deletedCount === 0) {
         console.log(`No notice found with videoId: ${videoId}`);
       } else {
@@ -229,7 +216,6 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
       );
 
       if (updateResult.matchedCount === 0) {
-        console.warn(`No video found with videoId: ${videoId}`);
         return { message: `No video found with videoId: ${videoId}` };
       } else {
         console.log(`Video with videoId: ${videoId} updated successfully.`);
@@ -243,24 +229,20 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
   }
 
 
-
-
   async saveReportdata(reportdata: any) {
+
     try {
-      console.log('Reached @ VideoRepository');
 
       const existingReport = await reportModel.findOne({ videoId: reportdata.videoId });
 
       if (existingReport) {
-
         const alreadyReported = await reportModel.findOne({
           videoId: reportdata.videoId,
           reasons: { $elemMatch: { reporterId: reportdata.reporterId } },
         });
 
         if (alreadyReported) {
-          console.log('User has already reported this video.');
-          return { message: 'You already reported this video' }; 
+          return { message: 'You already reported this video' };
         }
 
 
@@ -275,7 +257,6 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
             },
           }
         );
-        console.log('Report updated:', updatedReport);
 
         await VideoModel.updateOne(
           { _id: reportdata.videoId },
@@ -296,7 +277,6 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
         });
 
         const result = await newReport.save();
-        console.log('New report created:', result);
 
         await VideoModel.updateOne(
           { _id: reportdata.videoId },
@@ -324,28 +304,22 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
   }
 
 
-
-
-
   async watchlaterVideo(watchlaterdata: any) {
-    try {
-      console.log('reached @vrepo');
 
+    try {
       const existingVideo = await watchlaterModel.findOne({
         videoId: watchlaterdata.videoId,
         userId: watchlaterdata.userId,
       });
 
       if (existingVideo) {
-        console.log('Video already exists in Watch Later');
         return { isAlreadySaved: true };
       }
 
       const savewatchlaterVideo = new watchlaterModel(watchlaterdata);
-
       const result = await savewatchlaterVideo.save();
-
       return { isAlreadySaved: false, data: result };
+
     } catch (error) {
       console.error('Error saving video:', error);
       throw new Error('Failed to save video');
@@ -353,19 +327,17 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
   }
 
 
-
   async unlikeVideo(likedata: any) {
+
     try {
-      console.log('reached@unlikeRepo');
 
       const result = await likedModel.deleteOne({
         videoId: likedata.videoId,
         userId: likedata.userId,
       });
 
-      console.log("Delete result:", result);
-
       return result;
+
     } catch (error) {
       console.error("Error deleting video like:", error);
       throw new Error('Failed to unlike the video');
@@ -373,19 +345,15 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
   }
 
 
-
-
-
   async updateVideoViews(videoId: string) {
     try {
       const updatedVideo = await VideoModel.findByIdAndUpdate(
         videoId,
-        { $inc: { views: 1 } }, // Increment the views by 1
-        { new: true } // Return the updated document
+        { $inc: { views: 1 } }, 
+        { new: true } 
       );
 
       if (!updatedVideo) {
-        console.error(`No video found with id: ${videoId}`);
         return null;
       }
 
@@ -397,8 +365,8 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
   }
 
 
-
   async topviewdata() {
+
     try {
 
       const topdata = await VideoModel.find()
@@ -406,6 +374,7 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
         .limit(5);
 
       return topdata
+
     } catch (error) {
       console.error('Error updating video views:', error);
       throw error;
@@ -414,10 +383,12 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
 
 
   async updateVideo(videoId: string, updatedFields: Partial<any>) {
-    try {
-      const video = await VideoModel.findByIdAndUpdate(videoId, updatedFields, { new: true });
 
+    try {
+
+      const video = await VideoModel.findByIdAndUpdate(videoId, updatedFields, { new: true });
       return video;
+
     } catch (error) {
       console.error('Error updating video:', error);
       throw new Error('Database update error');
@@ -426,7 +397,9 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
 
 
   async findOthervideosByid(videoId: string): Promise<IvideoDocument[]> {
+
     try {
+
       const videoDatas = await VideoModel.find({
         _id: { $ne: videoId }
       });
@@ -435,6 +408,7 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
         throw new Error(`No other videos found`);
       }
       return videoDatas;
+
     } catch (error) {
       console.error('Error fetching other videos:', error);
       throw error;
@@ -443,12 +417,17 @@ export class VideoRepository extends BaseRepository<IvideoDocument> implements I
 
 
   async findv(filter: Record<string, any>): Promise<IvideoDocument[]> {
+
     try {
-      const videos = await VideoModel.find(filter).exec(); 
+
+      const videos = await VideoModel.find(filter).exec();
       return videos;
+
     } catch (error) {
+
       console.error('Error fetching videos:', error);
       throw new Error('Failed to fetch videos');
+      
     }
   }
 

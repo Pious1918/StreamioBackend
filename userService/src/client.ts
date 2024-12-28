@@ -2,13 +2,8 @@ import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import path from 'path';
 
-// // const PROTO_PATH = path.resolve(__dirname, '../../commentService/src/comment.proto');
-// const PROTO_PATH = path.resolve(__dirname, '../../videoService/proto/video.proto');
-// const PROTO_PATH = path.resolve('/app/videoService/proto/video.proto');
+
 const PROTO_PATH = path.resolve(__dirname, '../proto/video.proto');
-
-
-
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {});
 const videoPackage = grpc.loadPackageDefinition(packageDefinition)
 const videoProto:any = videoPackage.VideoService

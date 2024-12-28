@@ -13,7 +13,7 @@ export interface IuserDocument extends Document {
     role: string;
     subscribers?: string[];
     following?: string[];
-    createdAt?: Date;  // Add this if it doesn't exist already
+    createdAt?: Date; 
 
 }
 
@@ -29,7 +29,7 @@ const userSchema: Schema = new Schema({
     profilepicture: { type: String, default: 'noImage' },
     role: { type: String, default: 'user' },
     status: { type: String, default: 'active' },
-    createdAt: { type: Date, default: Date.now } , // Ensure createdAt field is here
+    createdAt: { type: Date, default: Date.now } , 
 
     subscribers: [{
         type: mongoose.Types.ObjectId,
@@ -40,7 +40,7 @@ const userSchema: Schema = new Schema({
         ref: 'StreamioUser'
     }]
 }, {
-    timestamps: true // Automatically adds createdAt and updatedAt
+    timestamps: true 
 });
 
 const userModel = mongoose.model<IuserDocument>('StreamioUser' , userSchema)

@@ -9,14 +9,14 @@ export interface ICommentDocument extends Document{
     username:string,
     createdAt?: Date;
     updatedAt?: Date;
-    replyComments?: IReplyComment[]; // New field for replies
+    replyComments?: IReplyComment[];
 
 }
 export interface IReplyComment {
     userId: string;
     username:string
     comment: string;
-    createdAt: Date; // Timestamp for when the reply was created
+    createdAt: Date; 
 }
 
 const replyCommentSchema = new Schema<IReplyComment>({
@@ -31,7 +31,7 @@ const commentSchema:Schema = new Schema({
     userId:{type:String, required:true},
     comment:{type:String, required:true},
     username:{type:String, required:true},
-    replyComments: { type: [replyCommentSchema], default: [] } // Array of replies
+    replyComments: { type: [replyCommentSchema], default: [] }
 
 },{ timestamps: true })
 

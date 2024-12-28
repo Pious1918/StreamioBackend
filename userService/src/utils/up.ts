@@ -32,12 +32,13 @@ export const getPresignedUrl = async (fileName: string, fileType: string): Promi
   try {
 
     const command = new PutObjectCommand(params);
-
-    // Get the pre-signed URL using the getSignedUrl function
     const url = await getSignedUrl(s3Client, command, { expiresIn: 300 });
     return url;
+
   } catch (err) {
+
     throw new Error(`Failed to create a pre-signed URL: ${err}`);
+
   }
 };
 
@@ -47,7 +48,6 @@ export const generatePresignedURL = async (bucketname: string, fileName: string,
   const params = {
     Bucket: bucketname,
     Key: fileName,
-    // ContentType:fileType
   }
 
   try {

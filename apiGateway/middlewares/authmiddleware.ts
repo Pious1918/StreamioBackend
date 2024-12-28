@@ -18,7 +18,7 @@ export interface IAuthRequest extends Request {
 }
 
 export class AuthMiddleware {
-    // Middleware method for authentication
+    
     public async authorize(req: IAuthRequest, res: Response, next: NextFunction): Promise<any> {
         const token = req.headers.authorization?.split(" ")[1];
         

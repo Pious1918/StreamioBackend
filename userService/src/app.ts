@@ -1,11 +1,8 @@
-// to configure and initializing the express app 
-
 import express from "express"
 import cors from "cors";
 import dotenv from 'dotenv'
 import connectDB from "./config/db"
 import cookieParser from 'cookie-parser';
-
 import userRoutes from "./routes/userRoute"
 import morgan from "morgan"
 import logger from "./utils/logger";
@@ -16,7 +13,6 @@ connectDB()
 const app = express()
 
 const morganFormat = ":method :url :status :response-time ms";
-// morganFormat says that I want to have the method, url , status and response in milli s
 
 app.use(express.json());
 app.use(cors())
@@ -39,7 +35,7 @@ app.use(
 );
 
 app.use(cookieParser());
-app.use("/", userRoutes);  // Prefix with '/user-service'
+app.use("/", userRoutes);  
 
 app.use(errorMiddleware)
 

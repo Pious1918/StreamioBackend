@@ -1,12 +1,8 @@
 import { createLogger, format, transports } from "winston";
-// createLogger - to create customized logger
-// format - how I want to see the data
-// transports - 
 
 const { combine, timestamp, json, colorize } = format;
 import DailyRotateFile from "winston-daily-rotate-file";
 
-// Custom format for console logging with colors
 const consoleLogFormat = format.combine(
     format.colorize(),
     format.printf(({ level, message,  }) => {
@@ -14,7 +10,6 @@ const consoleLogFormat = format.combine(
     })
 );
 
-// Create a Winston logger
 const logger = createLogger({
     level: "info",
     format: combine(colorize(), timestamp(), json()),

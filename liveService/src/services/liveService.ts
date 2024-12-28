@@ -13,21 +13,15 @@ export class LiveService {
     }
 
 
-
-
     async SaveLiveData(livedata:any){
 
-        console.log("live data @service ",livedata)
-
         const livedd = await this._liveRepostiory.createLivedata(livedata)
-        console.log("succes")
         return livedd
+
     }
 
 
     async deleteLive(roomId:string){
-        console.log("roomid@ servcie",roomId)
-
         const roomdata = await this._liveRepostiory.deletelive(roomId)
     }
 
