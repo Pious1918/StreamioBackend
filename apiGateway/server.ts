@@ -21,7 +21,7 @@ app.use(cors({
 app.use(morgan('tiny')); 
 
 // Global Authorization Middleware with route exclusion
-app.use((req: IAuthRequest, res: Response, next: NextFunction) => {
+app.use((req: any, res: Response, next: NextFunction) => {
     const exemptedPaths = [
         "/user-service/login", // Add paths to exclude here
     ];
