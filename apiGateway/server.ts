@@ -20,13 +20,24 @@ app.use(cors({
 
 app.use(morgan('tiny')); 
 
-app.use(async (req:IAuthRequest, res, next) => {
+// Global Authorization Middleware with route exclusion
+app.use(async (req, res, next) => {
+    const exemptedPaths = [
+        "/user-service/login", // Add paths to exclude here
+    ];
+
+    if (exemptedPaths.includes(req.originalUrl)) {
+        console.log(`Skipping authorization for path: ${req.originalUrl}`);
+        return next(); // Skip authorization
+    }
+
     try {
-        console.log("Authorizing request..."); // Log that authorization is starting
+        console.log("Authorizing request...");
         await authMiddleware.authorize(req, res, next); // Authorize the user
-        console.log(`Token validated. User ID: ${req.userId}`); // Log the userId extracted from the token
+        console.log(`Token validated. User ID: ${req.userId}`);
     } catch (error) {
         console.error("Authorization failed:", error);
+        return res.status(401).json({ error: "Unauthorized" }); // Respond with unauthorized if authorization fails
     }
 });
 
