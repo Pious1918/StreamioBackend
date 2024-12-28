@@ -21,51 +21,88 @@ app.use(cors({
 app.use(morgan('tiny')); 
 
 // Global Authorization Middleware with route exclusion
-// app.use((req: any, res: Response, next: NextFunction) => {
-//     const exemptedPaths = [
-//         "/user-service/login", // Add paths to exclude here
-//     ];
+app.use((req: any, res: Response, next: NextFunction) => {
+    const exemptedPaths = [
+        "/user-service/login", // Add paths to exclude here
+    ];
 
-//     if (exemptedPaths.includes(req.originalUrl)) {
-//         console.log(`Skipping authorization for path: ${req.originalUrl}`);
-//         return next(); // Skip authorization
-//     }
+    if (exemptedPaths.includes(req.originalUrl)) {
+        console.log(`Skipping authorization for path: ${req.originalUrl}`);
+        return next(); // Skip authorization
+    }
 
-//     console.log("Authorizing request...");
-//     authMiddleware
-//         .authorize(req, res, next)
-//         .then(() => {
-//             console.log(`Token validated. User ID: ${req.userId}`);
-//             next(); // Proceed to the next middleware if authorization succeeds
-//         })
-//         .catch((error) => {
-//             console.error("Authorization failed:", error);
-//             res.status(401).json({ error: "Unauthorized" }); // Respond with unauthorized if authorization fails
-//         });
-// });
-
-
-
-// app.use("/user-service", (req: IAuthRequest, res, next) => {
-//     if (req.userId) {
-//         console.log(`[USER SERVICE] Forwarding request with User ID: ${req.userId}`);
-//         req.headers["x-user-id"] = req.userId; // Inject userId into the headers
-//     } else {
-//         console.log("[USER SERVICE] No User ID available, skipping injection.");
-//     }
-//     proxy("http://user-service:5001")(req, res, next);
-// });
+    console.log("Authorizing request...");
+    authMiddleware
+        .authorize(req, res, next)
+        .then(() => {
+            console.log(`Token validated. User ID: ${req.userId}`);
+            next(); // Proceed to the next middleware if authorization succeeds
+        })
+        .catch((error) => {
+            console.error("Authorization failed:", error);
+            res.status(401).json({ error: "Unauthorized" }); // Respond with unauthorized if authorization fails
+        });
+});
 
 
 
+app.use("/user-service", (req: IAuthRequest, res, next) => {
+    if (req.userId) {
+        console.log(`[USER SERVICE] Forwarding request with User ID: ${req.userId}`);
+        req.headers["x-user-id"] = req.userId; // Inject userId into the headers
+    } else {
+        console.log("[USER SERVICE] No User ID available, skipping injection.");
+    }
+    proxy("http://user-service:5001")(req, res, next);
+});
 
-app.use('/user-service', proxy('http://user-service:5001'));
 
-app.use('/video-service', proxy('http://video-service:5002'))
+// Video Service
+app.use("/video-service", (req: IAuthRequest, res, next) => {
+    if (req.userId) {
+        console.log(`[VIDEO SERVICE] Forwarding request with User ID: ${req.userId}`);
+        req.headers["x-user-id"] = req.userId; // Inject userId into the headers
+    }
+    proxy("http://video-service:5002")(req, res, next);
+});
 
-app.use('/comment-service', proxy('http://comment-service:5003'))
+// Comment Service
+app.use("/comment-service", (req: IAuthRequest, res, next) => {
+    if (req.userId) {
+        console.log(`[COMMENT SERVICE] Forwarding request with User ID: ${req.userId}`);
+        req.headers["x-user-id"] = req.userId; // Inject userId into the headers
+    }
+    proxy("http://comment-service:5003")(req, res, next);
+});
 
-app.use('/live-service', proxy('http://live-service:5005'))
+// Live Service
+app.use("/live-service", (req: IAuthRequest, res, next) => {
+    if (req.userId) {
+        console.log(`[LIVE SERVICE] Forwarding request with User ID: ${req.userId}`);
+        req.headers["x-user-id"] = req.userId; // Inject userId into the headers
+    }
+    proxy("http://live-service:5005")(req, res, next);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+// app.use('/user-service', proxy('http://user-service:5001'));
+
+// app.use('/video-service', proxy('http://video-service:5002'))
+
+// app.use('/comment-service', proxy('http://comment-service:5003'))
+
+// app.use('/live-service', proxy('http://live-service:5005'))
 
 
 // Proxy WebSocket connections separately
