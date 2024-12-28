@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Response } from "express";
 import dotenv from 'dotenv';
 import cors from 'cors';
 import proxy from 'express-http-proxy'
@@ -21,7 +21,7 @@ app.use(cors({
 app.use(morgan('tiny')); 
 
 // Global Authorization Middleware with route exclusion
-app.use(async (req, res, next) => {
+app.use((req: IAuthRequest, res: Response, next: NextFunction) => {
     const exemptedPaths = [
         "/user-service/login", // Add paths to exclude here
     ];
@@ -31,15 +31,19 @@ app.use(async (req, res, next) => {
         return next(); // Skip authorization
     }
 
-    try {
-        console.log("Authorizing request...");
-        await authMiddleware.authorize(req, res, next); // Authorize the user
-        console.log(`Token validated. User ID: ${req.userId}`);
-    } catch (error) {
-        console.error("Authorization failed:", error);
-        return res.status(401).json({ error: "Unauthorized" }); // Respond with unauthorized if authorization fails
-    }
+    console.log("Authorizing request...");
+    authMiddleware
+        .authorize(req, res, next)
+        .then(() => {
+            console.log(`Token validated. User ID: ${req.userId}`);
+            next(); // Proceed to the next middleware if authorization succeeds
+        })
+        .catch((error) => {
+            console.error("Authorization failed:", error);
+            res.status(401).json({ error: "Unauthorized" }); // Respond with unauthorized if authorization fails
+        });
 });
+
 
 
 
