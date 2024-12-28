@@ -20,52 +20,36 @@ app.use(cors({
 
 app.use(morgan('tiny')); 
 
-// Global Authorization Middleware with route exclusion
-// app.use((req: any, res: Response, next: NextFunction) => {
-//     const exemptedPaths = [
-//         "/user-service/login", // Add paths to exclude here
-//     ];
 
-//     if (exemptedPaths.includes(req.originalUrl)) {
-//         console.log(`Skipping authorization for path: ${req.originalUrl}`);
-//         return next(); // Skip authorization
-//     }
-
-//     console.log("Authorizing request...");
-//     authMiddleware
-//         .authorize(req, res, next)
-//         .then(() => {
-//             console.log(`Token validated. User ID: ${req.userId}`);
-//             next(); // Proceed to the next middleware if authorization succeeds
-//         })
-//         .catch((error) => {
-//             console.error("Authorization failed:", error);
-//             res.status(401).json({ error: "Unauthorized" }); // Respond with unauthorized if authorization fails
-//         });
-// });
+// app.use('/user-service', proxy('http://user-service:5001'));
 
 
+app.use(
+    "/user-service",
+    (req, res, next) => {
+      // Apply authorization middleware only to private routes
+      const publicRoutes = ["/login", "/register"];
+      if (publicRoutes.some((route) => req.path.startsWith(route))) {
+        console.log("Public route accessed in user-service:", req.path);
+        return next(); // Skip authorization
+      }
+  
+      // For private routes, apply authorization middleware
+      authMiddleware.authorize(req, res, next);
+    },
+    proxy("http://user-service:5001")
+  );
+  
 
-// app.use("/user-service", (req: IAuthRequest, res, next) => {
-//     if (req.userId) {
-//         console.log(`[USER SERVICE] Forwarding request with User ID: ${req.userId}`);
-//         req.headers["x-user-id"] = req.userId; // Inject userId into the headers
-//     } else {
-//         console.log("[USER SERVICE] No User ID available, skipping injection.");
-//     }
-//     proxy("http://user-service:5001")(req, res, next);
-// });
+app.use('/video-service', authMiddleware.authorize.bind(authMiddleware), proxy('http://video-service:5002'));
+app.use('/comment-service', authMiddleware.authorize.bind(authMiddleware), proxy('http://comment-service:5003'));
+app.use('/live-service', authMiddleware.authorize.bind(authMiddleware), proxy('http://live-service:5005'));
 
+// app.use('/video-service', proxy('http://video-service:5002'))
 
+// app.use('/comment-service', proxy('http://comment-service:5003'))
 
-
-app.use('/user-service', proxy('http://user-service:5001'));
-
-app.use('/video-service', proxy('http://video-service:5002'))
-
-app.use('/comment-service', proxy('http://comment-service:5003'))
-
-app.use('/live-service', proxy('http://live-service:5005'))
+// app.use('/live-service', proxy('http://live-service:5005'))
 
 
 // Proxy WebSocket connections separately
