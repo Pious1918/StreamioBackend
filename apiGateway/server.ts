@@ -46,13 +46,18 @@ app.use((req: any, res: Response, next: NextFunction) => {
 
 
 
-
-// Proxy with userId injection
-app.use("/user-service", (req:IAuthRequest, res, next) => {
-    console.log(`[USER SERVICE] Forwarding request with User ID: ${req.userId}`);
-    req.headers["x-user-id"] = req.userId; // Inject userId into the headers
+app.use("/user-service", (req: IAuthRequest, res, next) => {
+    if (req.userId) {
+        console.log(`[USER SERVICE] Forwarding request with User ID: ${req.userId}`);
+        req.headers["x-user-id"] = req.userId; // Inject userId into the headers
+    } else {
+        console.log("[USER SERVICE] No User ID available, skipping injection.");
+    }
     proxy("http://user-service:5001")(req, res, next);
 });
+
+
+
 
 // app.use('/user-service', proxy('http://user-service:5001'));
 
