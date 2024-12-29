@@ -38,7 +38,7 @@ export class AuthMiddleware {
             return next();
         }
 
-console.log("adminhee",req.headers)
+        console.log("adminhee", req.headers)
 
         const token = req.headers.authorization?.split(" ")[1];
 
@@ -52,22 +52,25 @@ console.log("adminhee",req.headers)
             // Decode the token and determine whether it's for a user or admin
             const secret = this.isAdminRoute(req.path) ? process.env.JWT_ADMIN_SECRET : process.env.JWT_SECRET;
 
+            console.log("secret is ",secret)
+
+
             if (!secret) {
                 throw new Error("JWT secret not configured.");
-              }
+            }
 
-              const decoded: IPayload = jwt.verify(token, secret) as IPayload;
-              req.userId = decoded.userId; // Only store userId in the request
+            const decoded: IPayload = jwt.verify(token, secret) as IPayload;
+            req.userId = decoded.userId; // Only store userId in the request
             req.role = decoded.role; // Store the role
-  
+
             console.log(`User ID: ${req.userId}, Role: ${req.role} @api-gateway`);
 
 
-                // Additional role check for admin-specific routes
-      if (this.isAdminRoute(req.path) && decoded.role !== "admin") {
-        console.log("Access denied for non-admin user");
-        return res.status(403).json({ error: "Access denied. Admins only." });
-      }
+            // Additional role check for admin-specific routes
+            if (this.isAdminRoute(req.path) && decoded.role !== "admin") {
+                console.log("Access denied for non-admin user");
+                return res.status(403).json({ error: "Access denied. Admins only." });
+            }
 
 
 
@@ -93,14 +96,14 @@ console.log("adminhee",req.headers)
 
 
 
-     /**
-   * Checks if a route is exclusive to admin.
-   * @param path - The path of the request
-   * @returns Whether the route is admin-specific
-   */
-  private isAdminRoute(path: string): boolean {
-    return this.adminRoutes.some((route) => path.startsWith(route));
-  }
+    /**
+  * Checks if a route is exclusive to admin.
+  * @param path - The path of the request
+  * @returns Whether the route is admin-specific
+  */
+    private isAdminRoute(path: string): boolean {
+        return this.adminRoutes.some((route) => path.startsWith(route));
+    }
 
 
 }

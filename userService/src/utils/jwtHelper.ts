@@ -7,71 +7,76 @@ import { IadminDocument } from '../models/adminModel'
 
 dotenv.config()
 
-export interface IPayload{
-    
-        userId: string;
-        name: string;
-        email: string;
-        role: string;
-        status: string;
-    
+export interface IPayload {
+
+    userId: string;
+    name: string;
+    email: string;
+    role: string;
+    status: string;
+
 }
 
-export interface IadminPayload{
+export interface IadminPayload {
     adminId: string;
-    name:string;
-    email:string;
-    role:string;
+    name: string;
+    email: string;
+    role: string;
 
 }
 
 
-export const generateToken = (user:IuserDocument):string =>{
-    const payload : IPayload= {
-        userId:user._id,
-        name:user.name,
-        email:user.email,
-        role:user.role,
-        status:user.status
+export const generateToken = (user: IuserDocument): string => {
+    const payload: IPayload = {
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        status: user.status
     }
 
     //generating the token
-    return jwt.sign(payload , process.env.JWT_SECRET as string , {
+    return jwt.sign(payload, process.env.JWT_SECRET as string, {
 
-        expiresIn : process.env.JWT_EXPIRY || '1h'
+        expiresIn: process.env.JWT_EXPIRY || '1h'
     })
 }
 
 
-export const generateRefreshToken = (user:IuserDocument): string => {
 
-    const payload : IPayload= {
-        userId:user._id,
-        name:user.name,
-        email:user.email,
-        role:user.role,
-        status:user.status
+export const generateAdminToken = (admin: IadminDocument): string => {
+    const payload = {
+        userId: admin._id,
+        email: admin.email,
+        role: admin.role
+    }
+
+    //generating the token
+    return jwt.sign(payload, process.env.JWT_ADMIN_SECRET as string, {
+
+        expiresIn: process.env.JWT_EXPIRY || '1h'
+    })
+}
+
+
+
+
+
+
+
+
+export const generateRefreshToken = (user: IuserDocument): string => {
+
+    const payload: IPayload = {
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        status: user.status
     }
 
     return jwt.sign(payload, process.env.JWT_REFRESH_SECRET as string, { expiresIn: process.env.JWT_REFRESH_EXPIRY });
 };
-
-export const generateAdminToken = (admin:IadminDocument):string =>{
-    const payload= {
-        userId:admin._id,
-        email:admin.email,
-        role:admin.role
-    }
-
-    //generating the token
-    return jwt.sign(payload , process.env.JWT_ADMIN_SECRET as string , {
-
-        expiresIn : process.env.JWT_EXPIRY || '1h'
-    })
-}
-
-
-
 
 
 
