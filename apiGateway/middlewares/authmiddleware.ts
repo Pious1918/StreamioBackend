@@ -22,12 +22,12 @@ export class AuthMiddleware {
     private publicRoutes: string[] = ["/user-service/login", "/user-service/register", "/user-service/adminlogin"];
 
     private adminRoutes: string[] = [
-        "/user-service/userlist",
-        "/user-service/savebanner",
-        "/user-service/getbanner",
-        "/user-service/deletebanner",
-        "/user-service/countuser",
-        "/video-service/topfive",
+        "/userlist",
+        "/savebanner",
+        "/getbanner",
+        "/deletebanner",
+        "/countuser",
+        "/topfive",
     ]; // Define routes exclusive to admin
 
 
