@@ -54,8 +54,8 @@ export class AuthMiddleware {
                 throw new Error("JWT secret not configured.");
               }
 
-            const decoded: IPayload = jwt.verify(token, process.env.JWT_SECRET as string) as IPayload;
-            req.userId = decoded.userId; // Only store userId in the request
+              const decoded: IPayload = jwt.verify(token, secret) as IPayload;
+              req.userId = decoded.userId; // Only store userId in the request
             req.role = decoded.role; // Store the role
   
             console.log(`User ID: ${req.userId}, Role: ${req.role} @api-gateway`);
