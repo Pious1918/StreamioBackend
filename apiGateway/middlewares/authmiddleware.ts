@@ -113,7 +113,11 @@ export class AuthMiddleware {
   * @returns Whether the route is admin-specific
   */
     private isAdminRoute(path: string): boolean {
-        return this.adminRoutes.some((route) => path.startsWith(route));
+        // Use regular expression to handle dynamic routes like /userds/:id/status
+        return this.adminRoutes.some((route) => {
+            const regex = new RegExp(`^${route.replace(':id', '\\w+')}$`);
+            return regex.test(path);
+        });
     }
 
 
