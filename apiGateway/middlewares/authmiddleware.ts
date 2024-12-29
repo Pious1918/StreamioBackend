@@ -24,8 +24,8 @@ export class AuthMiddleware {
     private adminRoutes: string[] = [
         "/userlist",
         "/savebanner",
-        
         "/deletebanner",
+        "/getbanner",
         "/countuser",
         "/topfive",
         "/reportvideosAdmin",
