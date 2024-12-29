@@ -64,12 +64,12 @@ export const generateAdminToken = (admin:IadminDocument):string =>{
     }
 
     //generating the token
-    return jwt.sign(payload , process.env.JWT_SECRET as string , {
+    return jwt.sign(payload , process.env.JWT_ADMIN_SECRET as string , {
 
         expiresIn : process.env.JWT_EXPIRY || '1h'
     })
 }
-0
+
 
 
 
