@@ -29,7 +29,6 @@ export class AuthMiddleware {
         "/countuser",
         "/topfive",
         "/reportvideosAdmin",
-        "/userds/:id/status",
         "/generateCommonPresigner",
         "/verifybyadmin",
         "/noticebyadmin",
@@ -113,6 +112,13 @@ export class AuthMiddleware {
   * @returns Whether the route is admin-specific
   */
     private isAdminRoute(path: string): boolean {
+
+
+        // Skip '/userds/:id/status' from being checked
+        if (path.startsWith('/userds/') && path.includes('/status')) {
+            return false;
+        }
+
         // Use regular expression to handle dynamic routes like /userds/:id/status
         return this.adminRoutes.some((route) => {
             const regex = new RegExp(`^${route.replace(':id', '\\w+')}$`);
