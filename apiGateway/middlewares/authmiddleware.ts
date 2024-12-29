@@ -38,6 +38,8 @@ export class AuthMiddleware {
             return next();
         }
 
+console.log("adminhee",req.headers)
+
         const token = req.headers.authorization?.split(" ")[1];
 
         if (!token) {
