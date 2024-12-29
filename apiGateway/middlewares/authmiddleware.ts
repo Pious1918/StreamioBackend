@@ -59,6 +59,14 @@ export class AuthMiddleware {
 
         try {
 
+
+                 // Check if the route is excluded from admin checking
+                 if (this.isExcludedRoute(req.path)) {
+                    return next(); // Skip further checks and move to the next middleware
+                }
+
+
+
             // Decode the token and determine whether it's for a user or admin
             const secret = this.isAdminRoute(req.path) ? process.env.JWT_ADMIN_SECRET : process.env.JWT_SECRET;
 
@@ -112,13 +120,7 @@ export class AuthMiddleware {
   * @returns Whether the route is admin-specific
   */
     private isAdminRoute(path: string): boolean {
-
-
-        // Skip '/userds/:id/status' from being checked
-        if (path.startsWith('/userds/') && path.includes('/status')) {
-            return false;
-        }
-
+        
         // Use regular expression to handle dynamic routes like /userds/:id/status
         return this.adminRoutes.some((route) => {
             const regex = new RegExp(`^${route.replace(':id', '\\w+')}$`);
@@ -126,5 +128,17 @@ export class AuthMiddleware {
         });
     }
 
+
+
+
+        /**
+     * Checks if the route is excluded from admin checking (i.e., /userds/:id/status)
+     * @param path - The path of the request
+     * @returns Whether the route is excluded from admin checking
+     */
+        private isExcludedRoute(path: string): boolean {
+            // Skip '/userds/:id/status' from being checked
+            return path.startsWith('/userds/') && path.includes('/status');
+        }
 
 }
