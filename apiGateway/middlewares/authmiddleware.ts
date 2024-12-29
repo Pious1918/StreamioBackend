@@ -28,6 +28,11 @@ export class AuthMiddleware {
         "/deletebanner",
         "/countuser",
         "/topfive",
+        "/reportvideosAdmin",
+        "/userds/:id/status",
+        "/generateCommonPresigner",
+        "/verifybyadmin",
+        "/noticebyadmin",
     ]; // Define routes exclusive to admin
 
 
