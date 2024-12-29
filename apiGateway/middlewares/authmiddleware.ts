@@ -38,6 +38,15 @@ export class AuthMiddleware {
 
     public async authorize(req: IAuthRequest, res: Response, next: NextFunction): Promise<any> {
 
+            // Check if the route is excluded from admin checking
+            if (this.isExcludedRoute(req.path)) {
+                return next(); // Skip further checks and move to the next middleware
+            }
+
+
+
+
+
         // Check if the route is public
         if (this.isPublicRoute(req.path)) {
             console.log("Public route accessed:", req.path);
@@ -60,11 +69,7 @@ export class AuthMiddleware {
         try {
 
 
-                 // Check if the route is excluded from admin checking
-                 if (this.isExcludedRoute(req.path)) {
-                    return next(); // Skip further checks and move to the next middleware
-                }
-
+             
 
 
             // Decode the token and determine whether it's for a user or admin
