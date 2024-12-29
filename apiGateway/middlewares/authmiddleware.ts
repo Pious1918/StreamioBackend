@@ -26,6 +26,8 @@ export class AuthMiddleware {
         "/user-service/savebanner",
         "/user-service/getbanner",
         "/user-service/deletebanner",
+        "/user-service/countuser",
+        "/video-service/topfive",
     ]; // Define routes exclusive to admin
 
 
