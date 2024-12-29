@@ -430,6 +430,20 @@ export class UserController implements IUserController {
 
 
 
+    public getBanneruser = async (req: Request, res: Response) => {
+
+        try {
+
+            const getbanner = await this._userService.getBanner()
+            res.status(StatusCodes.OK).json({ getbanner, message: 'banner fetching is successfull' })
+
+        } catch (error) {
+            console.error("error getting banner")
+        }
+    }
+
+
+
     public adminLogin = async (req: Request, res: Response) => {
         const { email, password } = req.body
 

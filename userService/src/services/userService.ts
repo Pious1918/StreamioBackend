@@ -157,6 +157,10 @@ export class UserService implements IUserService {
         }
     }
 
+    async getBanner(){
+        const getbanner = await this._adminRepository.getbanner()
+        return getbanner
+    }
 
     async getFollowinglist(userId: string) {
         try {
