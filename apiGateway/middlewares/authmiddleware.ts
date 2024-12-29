@@ -131,14 +131,9 @@ export class AuthMiddleware {
 
 
 
-        /**
-     * Checks if the route is excluded from admin checking (i.e., /userds/:id/status)
-     * @param path - The path of the request
-     * @returns Whether the route is excluded from admin checking
-     */
-        private isExcludedRoute(path: string): boolean {
-            // Skip '/userds/:id/status' from being checked
-            return path.startsWith('/userds/') && path.includes('/status');
-        }
+    private isExcludedRoute(path: string): boolean {
+        const regex = /^\/userds\/[^/]+\/status$/;
+        return regex.test(path);
+    }
 
 }
