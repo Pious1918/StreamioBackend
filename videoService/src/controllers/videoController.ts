@@ -3,6 +3,7 @@ import { getPresignedUrl, } from "../utils/s3uploader";
 import { IAuthRequest } from "../middleware/authmiddle";
 import { videoService } from "../services/videoService";
 import ffmpeg from 'fluent-ffmpeg';
+import { Metadata } from '@grpc/grpc-js';
 
 import { IVideoController } from "../interfaces/Ivideocontroller.interface";
 
@@ -127,6 +128,14 @@ export class VideoController implements IVideoController {
 
             const { videoId } = req.params;
             const userId: any = req.user?.userId
+            const authToken = req.headers.authorization?.split(" ")[1]; // Extract the token
+
+            if (!authToken) {
+                res.status(StatusCodes.UNAUTHORIZED).send("Authorization token is missing");
+                return;
+            }
+
+
             const videoData = await this._videoService.findVideo(videoId);
 
             if (!videoData || !videoData.videolink) {
@@ -137,9 +146,12 @@ export class VideoController implements IVideoController {
             const uploaderId = videoData.uploaderId;
 
             // Helper function to promisify gRPC calls
-            const fetchComments = (videoId: string): Promise<any[]> => {
+            const fetchComments = (videoId: string, authToken: string): Promise<any[]> => {
                 return new Promise((resolve, reject) => {
-                    client.getComments({ videoId }, (error: GetCommentsError | null, response: CommentResponse | null) => {
+                    const metadata = new Metadata();
+                    metadata.add('Authorization', `Bearer ${authToken}`);
+
+                    client.getComments({ videoId },metadata, (error: GetCommentsError | null, response: CommentResponse | null) => {
                         if (error) {
                             return reject(error);
                         }
@@ -192,7 +204,7 @@ export class VideoController implements IVideoController {
 
             // Fetch both comments and uploader data concurrently
             const [comments, uploaderData] = await Promise.all([
-                fetchComments(videoId),
+                fetchComments(videoId ,authToken),
                 fetchUploaderData(uploaderId),
             ]);
 
@@ -298,7 +310,7 @@ export class VideoController implements IVideoController {
         } catch (error) {
 
             console.error(error)
-            
+
         }
 
     }
@@ -380,7 +392,7 @@ export class VideoController implements IVideoController {
         }
     };
 
-    
+
     public likeVideo = async (req: IAuthRequest, res: Response) => {
         try {
             const userId = req.user?.userId

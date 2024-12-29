@@ -3,8 +3,10 @@ import * as protoLoader from '@grpc/proto-loader';
 import path from 'path';
 import commentModel from '../models/commentModel';
 const PROTO_PATH = './proto/comment.proto';
-
-
+import { Metadata } from '@grpc/grpc-js';
+import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv'
+dotenv.config()
 var packageDefinition = protoLoader.loadSync(PROTO_PATH, {})
 const commentPackage = grpc.loadPackageDefinition(packageDefinition);
 const commentProto: any = commentPackage.CommentService
@@ -15,9 +17,31 @@ const comments: any = {}
 
 
 async function GetComments(call: any, callback: any) {
+
+  const metadata = call.metadata.get('authorization');
+  if (!metadata || metadata.length === 0) {
+    return callback({
+      code: grpc.status.UNAUTHENTICATED,
+      message: 'Missing authentication token',
+    });
+  }
+
+  const token = metadata[0].split(' ')[1];
+
+  if (!process.env.JWT_SECRET) {
+    console.error("JWT_SECRET is not defined in the environment variables.");
+    return callback({
+      code: grpc.status.INTERNAL,
+      message: 'Server misconfiguration: JWT secret is missing.',
+    });
+  }
+
   const { videoId } = call.request;
 
   try {
+
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const comments = await commentModel.find({ videoId });
 
@@ -39,7 +63,19 @@ async function GetComments(call: any, callback: any) {
       status: 'success',
       comments: commentData,
     });
-  } catch (error) {
+  } catch (error:any) {
+
+
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      // Handle token verification errors
+      return callback({
+        code: grpc.status.UNAUTHENTICATED,
+        message: 'Invalid or expired token',
+      });
+    }
+
+    // Handle other errors (e.g., database query issues)
+    console.error("Error fetching comments:", error);
 
     callback({
       code: grpc.status.INTERNAL,
