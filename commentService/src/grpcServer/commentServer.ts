@@ -41,7 +41,10 @@ async function GetComments(call: any, callback: any) {
   try {
 
 
+    
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    console.log("decoded @ commentgrpcser",decoded)
 
     const comments = await commentModel.find({ videoId });
 
