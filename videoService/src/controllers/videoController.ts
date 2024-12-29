@@ -172,9 +172,11 @@ export class VideoController implements IVideoController {
                 });
             };
 
-            const fetchUploaderData = (uploaderId: string): Promise<any> => {
+            const fetchUploaderData = (uploaderId: string ,authToken:string): Promise<any> => {
                 return new Promise((resolve, reject) => {
-                    client2.GetChannelDetails({ _id: uploaderId }, (error: any, response: UserResponse) => {
+                    const metadata = new Metadata();
+                    metadata.add('Authorization', `Bearer ${authToken}`);
+                    client2.GetChannelDetails({ _id: uploaderId },metadata, (error: any, response: UserResponse) => {
                         if (error) {
                             return reject(error);
                         }
@@ -205,7 +207,7 @@ export class VideoController implements IVideoController {
             // Fetch both comments and uploader data concurrently
             const [comments, uploaderData] = await Promise.all([
                 fetchComments(videoId ,authToken),
-                fetchUploaderData(uploaderId),
+                fetchUploaderData(uploaderId , authToken),
             ]);
 
             let subscribed: string | boolean = false;

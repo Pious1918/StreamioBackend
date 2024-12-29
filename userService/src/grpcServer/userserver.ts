@@ -1,6 +1,9 @@
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import userModel from '../models/userModel';
+import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv'
+dotenv.config()
 
 const PROTO_PATH = './proto/user.proto';
 
@@ -12,9 +15,34 @@ console.log("user proto is", userProto)
 
 async function GetChannelDetails(call: any, callback: any) {
 
+    const metadata = call.metadata.get('authorization');
+    if (!metadata || metadata.length === 0) {
+      return callback({
+        code: grpc.status.UNAUTHENTICATED,
+        message: 'Missing authentication token',
+      });
+    }
+  
+    const token = metadata[0].split(' ')[1];
+  
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not defined in the environment variables.");
+      return callback({
+        code: grpc.status.INTERNAL,
+        message: 'Server misconfiguration: JWT secret is missing.',
+      });
+    }
+
+
+
+
     try {
 
         const uploaderId = call.request._id;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        console.log("decoded @ usergrpc",decoded)
+
         const channelDetails = await userModel.findOne({ _id: uploaderId });
 
         if (!channelDetails) {
@@ -31,7 +59,18 @@ async function GetChannelDetails(call: any, callback: any) {
             email: channelDetails.email,
         });
 
-    } catch (error) {
+    } catch (error:any) {
+
+
+        if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+            // Handle token verification errors
+            return callback({
+              code: grpc.status.UNAUTHENTICATED,
+              message: 'Invalid or expired token',
+            });
+          }
+
+
 
         console.error('Error in GetChannelDetails:', error);
         // Handle any unexpected errors

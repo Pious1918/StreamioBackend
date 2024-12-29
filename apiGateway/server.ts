@@ -21,7 +21,7 @@ app.use(cors({
 app.use(morgan('tiny')); 
 
 
-// app.use('/user-service', proxy('http://user-service:5001'));
+
 
 
 app.use(
@@ -45,14 +45,6 @@ app.use('/video-service', authMiddleware.authorize.bind(authMiddleware), proxy('
 app.use('/comment-service', authMiddleware.authorize.bind(authMiddleware), proxy('http://comment-service:5003'));
 app.use('/live-service', authMiddleware.authorize.bind(authMiddleware), proxy('http://live-service:5005'));
 
-// app.use('/video-service', proxy('http://video-service:5002'))
-
-// app.use('/comment-service', proxy('http://comment-service:5003'))
-
-// app.use('/live-service', proxy('http://live-service:5005'))
-
-
-// Proxy WebSocket connections separately
 app.use('/socket.io', createProxyMiddleware({
     target: 'http://live-service:5005',
     ws: true,  // This ensures WebSocket connections are handled properly
