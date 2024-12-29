@@ -28,7 +28,7 @@ app.use(
     "/user-service",
     (req, res, next) => {
       // Apply authorization middleware only to private routes
-      const publicRoutes = ["/login", "/register" ,"/adminlogin"];
+      const publicRoutes = ["/login", "/register" ,"/adminlogin" ,"/getbanneruser"];
       if (publicRoutes.some((route) => req.path.startsWith(route))) {
         console.log("Public route accessed in user-service:", req.path);
         return next(); // Skip authorization
