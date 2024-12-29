@@ -40,6 +40,10 @@ export class AuthMiddleware {
             return next();
         }
 
+        console.log("Admin check for route:", req.path);  // Debugging the route
+
+
+
         console.log("adminhee", req.headers)
 
         const token = req.headers.authorization?.split(" ")[1];
