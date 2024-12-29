@@ -19,7 +19,7 @@ export interface IAuthRequest extends Request {
 }
 
 export class AuthMiddleware {
-    private publicRoutes: string[] = ["/user-service/login", "/user-service/register", "/user-service/adminlogin", "/user-service/getbanneruser"];
+    private publicRoutes: string[] = ["/user-service/login", "/user-service/register", "/user-service/adminlogin", "/user-service/getbanneruser", "/user-service/generateotp" ,"/user-service/resetpassword", "/user-service/submitotp"];
 
     private adminRoutes: string[] = [
         "/userlist",
